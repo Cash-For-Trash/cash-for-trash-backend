@@ -1,0 +1,15 @@
+{
+  "editor.formatOnSave": true,
+  "workbench.activityBar.autoHide": false,
+  "workbench.activityBar.compact": false,
+  "workbench.view.alwaysShowHeaderActions": true,
+  "workbench.view.showQuietly": {
+    "workbench.panel.output": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "telemetry.editStats.showStatusBar": true,
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+  "workbench.activityBar.location": "default",
+  "workbench.statusBar.visible": true,
+  "workbench.tree.enableStickyScroll": true
+}
