@@ -13,5 +13,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model PointsTransaction {
+  point_id     Int      @id @default(autoincrement())
+  user_id      Int
+  points       Float
+  status       String   @db.VarChar(50)
+  points_date  DateTime @db.DateTime()
+}
 
+model Availability {
+  availability_id Int      @id @default(autoincrement())
+  location        String   @db.VarChar(300)
+  day_of_week     String   @db.VarChar(15)
+  from_time       DateTime @db.DateTime()
+  to_time         DateTime @db.DateTime()
+}
 
+model GarbageType {
+  garbage_type_id    Int              @id @default(autoincrement())
+  request_garbage_id Int
+  price_per_kg       Float
+  garbage_type_image String           @db.VarChar(512)
+  garbage_type_name  String           @db.VarChar(100)
+  RequestGarbage     RequestGarbage[]
+}
+
+model RequestGarbage {
+  request_garbage_id    Int               @id @default(autoincrement())
+  collection_request_id Int
+  actual_weight         Float
+  earned_points         Int
+  garbage_type_id       Int
+  GarbageType           GarbageType       @relation(fields: [garbage_type_id], references: [garbage_type_id])
+  CollectionRequest     CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
+}
+
+model CollectionRequest {
+  collection_request_id Int              @id @default(autoincrement())
+  user_id               Int
+  request_date          DateTime         @db.DateTime()
+  quantity              Float            
+  collection_img        String           @db.VarChar(512)
+  status                String           @db.VarChar(40)
+  RequestGarbage        RequestGarbage[]
+  Payment               Payment[]
+}
+
+model Payment {
+  payment_id            Int               @id @default(autoincrement())
+  collection_request_id Int
+  payment_method        String            @db.VarChar(60)
+  payment_status        String            @db.VarChar(40)
+  payment_date          DateTime          @db.DateTime()
+  payment_amount        Float
+  CollectionRequest     CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
+}
