@@ -13,7 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model PointsTransaction {
   point_id    String   @id @default(cuid())
 
@@ -21,8 +20,9 @@ model PointsTransaction {
   user        User     @relation(fields: [user_id], references: [user_id])
 
   points      Int
-  status      String   @db.VarChar(50)
+  reason String @db.VarChar(100)
   points_date DateTime @default(now())
+  created_at DateTime @default(now())
 }
 
 model Availability {
@@ -35,6 +35,8 @@ model Availability {
 
   workerAvailabilities WorkerAvailability[]
 }
+
+
 
 model GarbageType {
   garbage_type_id    String   @id @default(cuid())
@@ -55,8 +57,8 @@ model RequestGarbage {
   garbage_type_id        String
   garbageType            GarbageType @relation(fields: [garbage_type_id], references: [garbage_type_id])
 
-  actual_weight          Decimal @db.Decimal(10,2)
-  earned_points          Int
+  actual_weight          Decimal? @db.Decimal(10,2)
+  earned_points          Int?
 }
 
 model CollectionRequest {
@@ -67,18 +69,20 @@ model CollectionRequest {
 
   request_date         DateTime @default(now())
   quantity             Decimal @db.Decimal(10,2)
-  collection_img       String @db.VarChar(512)
+  collection_img String? @db.VarChar(512)
   status               String @db.VarChar(40)
 
   requestGarbages      RequestGarbage[]
-  payments             Payment[]
-  workerRequests       Worker_collection_request[]
+  payments             Payment?
+
+  workerRequests       WorkerCollectionRequest []
 }
 
 model Payment {
   payment_id            String @id @default(cuid())
 
-  collection_request_id String
+  collection_request_id String @unique
+
   collectionRequest     CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
 
   payment_method        String @db.VarChar(60)
@@ -102,7 +106,8 @@ model Order {
   total_price   Decimal @db.Decimal(10,2)
   final_price   Decimal @db.Decimal(10,2)
 
-  order_date    DateTime @default(now())
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
   status        String @db.VarChar(30)
 
   items         OrderItem[]
@@ -123,32 +128,34 @@ model OrderItem {
 
 model Product {
   product_id      String @id @default(cuid())
-
   name            String @db.VarChar(100)
   description     String @db.VarChar(300)
   stock_quantity  Int
-
+  image String? @db.VarChar(512)
+  price Decimal @db.Decimal(10,2)
   orderItems      OrderItem[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
-model Worker_collection_request {
+model WorkerCollectionRequest  {
   user_id                String
   collection_request_id  String
 
-  user                   User @relation(fields: [user_id], references: [user_id])
+  worker Worker @relation(fields: [user_id], references: [user_id])
   collectionRequest      CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
 
   @@id([user_id, collection_request_id])
 }
 
 model WorkerAvailability {
-  workerAvailability_id String @id @default(cuid())
+  availability_id String
+  user_id         String
 
-  availability_id       String
-  availability          Availability @relation(fields: [availability_id], references: [availability_id])
+  availability Availability @relation(fields: [availability_id], references: [availability_id])
+  worker       Worker       @relation(fields: [user_id], references: [user_id])
 
-  user_id               String
-  user                  User @relation(fields: [user_id], references: [user_id])
+  @@id([availability_id, user_id])
 }
 
 model Notification {
@@ -158,7 +165,7 @@ model Notification {
   user            User @relation(fields: [user_id], references: [user_id])
 
   message         String @db.VarChar(500)
-  name            String @db.VarChar(100)
+  title            String @db.VarChar(100)
 
   is_read         Boolean @default(false)
 
@@ -166,3 +173,117 @@ model Notification {
   updated_at      DateTime @updatedAt
 }
 
+model User {
+    user_id         String   @id @default(cuid())
+
+  first_name      String   @db.VarChar(30)
+  last_name       String   @db.VarChar(30)
+
+  email           String   @unique @db.VarChar(255)
+  password        String   @db.VarChar(255)
+
+  mobile          String?  @db.VarChar(20)
+  national_id     String?  @unique @db.VarChar(20)
+
+  image           String?  @db.VarChar(512)
+
+  role            String   @db.VarChar(20)
+
+  otp             String?  @db.VarChar(6)
+  otp_created_at  DateTime?
+
+  is_verified     Boolean  @default(false)
+  is_active       Boolean  @default(true)
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  // Relations
+  customer Customer?
+  worker Worker?
+  admin Admin?
+
+  addresses Address[]
+
+  notifications Notification[]
+  pointTransactions PointsTransaction[]
+
+  collectionRequests CollectionRequest[]
+  orders Order[]
+
+  workerAssignments WorkerCollectionRequest[]
+  workerAvailabilities WorkerAvailability[]
+}
+
+model Address {
+  address_id      String @id @default(cuid())
+
+  building_num    Int
+  floor           String?
+  location String @db.VarChar(300)  
+  latitude  Decimal @db.Decimal(10,7)
+  longitude Decimal @db.Decimal(10,7)
+  additional_note String? @db.VarChar(500)
+
+  user_id         String
+  user            User @relation(fields: [user_id], references: [user_id])
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
+model Customer {
+  user_id String @id
+
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  points Decimal @default(0) @db.Decimal(10,2)
+
+  rewardRedemptions RewardRedemption[]
+}
+
+model Worker {
+  user_id String @id
+
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+
+  workerRequests      WorkerCollectionRequest[]
+  workerAvailability  WorkerAvailability[]
+}
+
+model Admin {
+  user_id String @id
+
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
+model Reward {
+  reward_id String @id @default(cuid())
+
+  name String @db.VarChar(100)
+
+  required_points Decimal @db.Decimal(10,2)
+
+  image String? @db.VarChar(512)
+
+  rewardRedemptions RewardRedemption[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model RewardRedemption {
+  redemption_id String @id @default(cuid())
+
+  user_id String
+  customer Customer @relation(fields: [user_id], references: [user_id])
+
+  reward_id String
+  reward Reward @relation(fields: [reward_id], references: [reward_id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  points_spent Decimal @db.Decimal(10,2)
+
+  status String @db.VarChar(20)
+}
