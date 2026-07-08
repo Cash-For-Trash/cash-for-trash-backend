@@ -14,138 +14,154 @@ datasource db {
 }
 
 model PointsTransaction {
-  point_id    String   @id @default(cuid())
+  point_id String @id @default(cuid())
 
-  user_id     String
-  user        User     @relation(fields: [user_id], references: [user_id])
+  user_id String
+  user    User   @relation(fields: [user_id], references: [user_id])
 
   points      Int
-  reason String @db.VarChar(100)
+  reason      String   @db.VarChar(100)
   points_date DateTime @default(now())
-  created_at DateTime @default(now())
+  created_at  DateTime @default(now())
+
+  @@index([user_id])
 }
 
 model Availability {
-  availability_id String   @id @default(cuid())
+  availability_id String @id @default(cuid())
 
-  location        String   @db.VarChar(300)
-  day_of_week     String   @db.VarChar(15)
-  from_time       DateTime
-  to_time         DateTime
+  location    String   @db.VarChar(300)
+  day_of_week String   @db.VarChar(15)
+  from_time   DateTime
+  to_time     DateTime
 
   workerAvailabilities WorkerAvailability[]
+
+  @@index([day_of_week])
 }
 
-
-
 model GarbageType {
-  garbage_type_id    String   @id @default(cuid())
+  garbage_type_id String @id @default(cuid())
 
-  garbage_type_name  String   @db.VarChar(100)
-  garbage_type_image String   @db.VarChar(512)
-  price_per_kg       Decimal  @db.Decimal(10,2)
+  garbage_type_name  String  @db.VarChar(100)
+  garbage_type_image String  @db.VarChar(512)
+  price_per_kg       Decimal @db.Decimal(10, 2)
 
-  requestGarbages    RequestGarbage[]
+  requestGarbages RequestGarbage[]
 }
 
 model RequestGarbage {
-  request_garbage_id     String   @id @default(cuid())
+  request_garbage_id String @id @default(cuid())
 
-  collection_request_id  String
-  collectionRequest      CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
+  collection_request_id String
+  collectionRequest     CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
 
-  garbage_type_id        String
-  garbageType            GarbageType @relation(fields: [garbage_type_id], references: [garbage_type_id])
+  garbage_type_id String
+  garbageType     GarbageType @relation(fields: [garbage_type_id], references: [garbage_type_id])
 
-  actual_weight          Decimal? @db.Decimal(10,2)
-  earned_points          Int?
+  actual_weight Decimal? @db.Decimal(10, 2)
+  earned_points Int?
+
+  @@index([collection_request_id])
+  @@index([garbage_type_id])
 }
 
 model CollectionRequest {
-  collection_request_id String   @id @default(cuid())
+  collection_request_id String @id @default(cuid())
 
-  user_id              String
-  user                 User @relation(fields: [user_id], references: [user_id])
+  user_id String
+  user    User   @relation(fields: [user_id], references: [user_id])
 
-  request_date         DateTime @default(now())
-  quantity             Decimal @db.Decimal(10,2)
-  collection_img String? @db.VarChar(512)
-  status               String @db.VarChar(40)
+  request_date   DateTime @default(now())
+  quantity       Decimal  @db.Decimal(10, 2)
+  collection_img String?  @db.VarChar(512)
+  status         String   @db.VarChar(40)
 
-  requestGarbages      RequestGarbage[]
-  payments             Payment?
+  requestGarbages RequestGarbage[]
+  payments        Payment?
 
-  workerRequests       WorkerCollectionRequest []
+  workerRequests WorkerCollectionRequest[]
+
+  @@index([user_id, request_date])
+  @@index([status, request_date])
 }
 
 model Payment {
-  payment_id            String @id @default(cuid())
+  payment_id String @id @default(cuid())
 
   collection_request_id String @unique
 
-  collectionRequest     CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
+  collectionRequest CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
 
-  payment_method        String @db.VarChar(60)
-  payment_status        String @db.VarChar(40)
+  payment_method String @db.VarChar(60)
+  payment_status String @db.VarChar(40)
 
-  payment_date          DateTime @default(now())
-  payment_amount        Decimal @db.Decimal(10,2)
+  payment_date   DateTime @default(now())
+  payment_amount Decimal  @db.Decimal(10, 2)
 
-  orders                Order[]
+  orders Order[]
 }
 
 model Order {
-  order_id      String @id @default(cuid())
+  order_id String @id @default(cuid())
 
-  payment_id    String
-  payment       Payment @relation(fields: [payment_id], references: [payment_id])
+  payment_id String
+  payment    Payment @relation(fields: [payment_id], references: [payment_id])
 
-  user_id       String
-  user          User @relation(fields: [user_id], references: [user_id])
+  user_id String
+  user    User   @relation(fields: [user_id], references: [user_id])
 
-  total_price   Decimal @db.Decimal(10,2)
-  final_price   Decimal @db.Decimal(10,2)
+  total_price Decimal @db.Decimal(10, 2)
+  final_price Decimal @db.Decimal(10, 2)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  status        String @db.VarChar(30)
+  status     String   @db.VarChar(30)
 
-  items         OrderItem[]
+  items OrderItem[]
+
+  @@index([user_id, created_at])
+  @@index([status])
 }
 
 model OrderItem {
-  orderItem_id  String @id @default(cuid())
+  orderItem_id String @id @default(cuid())
 
-  order_id      String
-  order         Order @relation(fields: [order_id], references: [order_id])
+  order_id String
+  order    Order  @relation(fields: [order_id], references: [order_id])
 
-  product_id    String
-  product       Product @relation(fields: [product_id], references: [product_id])
+  product_id String
+  product    Product @relation(fields: [product_id], references: [product_id])
 
-  unit_price    Decimal @db.Decimal(10,2)
-  quantity      Int
+  unit_price Decimal @db.Decimal(10, 2)
+  quantity   Int
+
+  @@index([product_id])
 }
 
 model Product {
-  product_id      String @id @default(cuid())
-  name            String @db.VarChar(100)
-  description     String @db.VarChar(300)
-  stock_quantity  Int
-  image String? @db.VarChar(512)
-  price Decimal @db.Decimal(10,2)
-  orderItems      OrderItem[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  product_id     String      @id @default(cuid())
+  name           String      @db.VarChar(100)
+  description    String      @db.VarChar(300)
+  stock_quantity Int
+  image          String?     @db.VarChar(512)
+  price          Decimal     @db.Decimal(10, 2)
+  orderItems     OrderItem[]
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+
+  @@index([name])
 }
 
-model WorkerCollectionRequest  {
-  user_id                String
-  collection_request_id  String
+model WorkerCollectionRequest {
+  user_id               String
+  collection_request_id String
 
-  worker Worker @relation(fields: [user_id], references: [user_id])
-  collectionRequest      CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
+  worker            Worker            @relation(fields: [user_id], references: [user_id])
+  collectionRequest CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
 
   @@id([user_id, collection_request_id])
+  @@index([collection_request_id])
 }
 
 model WorkerAvailability {
@@ -156,80 +172,85 @@ model WorkerAvailability {
   worker       Worker       @relation(fields: [user_id], references: [user_id])
 
   @@id([availability_id, user_id])
+  @@index([user_id])
 }
 
 model Notification {
   notification_id String @id @default(cuid())
 
-  user_id         String
-  user            User @relation(fields: [user_id], references: [user_id])
+  user_id String
+  user    User   @relation(fields: [user_id], references: [user_id])
 
-  message         String @db.VarChar(500)
-  title            String @db.VarChar(100)
+  message String @db.VarChar(500)
+  title   String @db.VarChar(100)
 
-  is_read         Boolean @default(false)
+  is_read Boolean @default(false)
 
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id, is_read])
+  @@index([created_at])
 }
 
 model User {
-    user_id         String   @id @default(cuid())
+  user_id String @id @default(cuid())
 
-  first_name      String   @db.VarChar(30)
-  last_name       String   @db.VarChar(30)
+  first_name String @db.VarChar(30)
+  last_name  String @db.VarChar(30)
 
-  email           String   @unique @db.VarChar(255)
-  password        String   @db.VarChar(255)
+  email    String @unique @db.VarChar(255)
+  password String @db.VarChar(255)
 
-  mobile          String?  @db.VarChar(20)
-  national_id     String?  @unique @db.VarChar(20)
+  mobile      String? @db.VarChar(20)
+  national_id String? @unique @db.VarChar(20)
 
-  image           String?  @db.VarChar(512)
+  image String? @db.VarChar(512)
 
-  role            String   @db.VarChar(20)
+  role String @db.VarChar(20)
 
-  otp             String?  @db.VarChar(6)
-  otp_created_at  DateTime?
+  otp            String?   @db.VarChar(6)
+  otp_created_at DateTime?
 
-  is_verified     Boolean  @default(false)
-  is_active       Boolean  @default(true)
+  is_verified Boolean @default(false)
+  is_active   Boolean @default(true)
 
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   // Relations
   customer Customer?
-  worker Worker?
-  admin Admin?
+  worker   Worker?
+  admin    Admin?
 
   addresses Address[]
 
-  notifications Notification[]
+  notifications     Notification[]
   pointTransactions PointsTransaction[]
 
   collectionRequests CollectionRequest[]
-  orders Order[]
+  orders             Order[]
 
-  workerAssignments WorkerCollectionRequest[]
-  workerAvailabilities WorkerAvailability[]
+  @@index([role, is_active])
 }
 
 model Address {
-  address_id      String @id @default(cuid())
+  address_id String @id @default(cuid())
 
   building_num    Int
   floor           String?
-  location String @db.VarChar(300)  
-  latitude  Decimal @db.Decimal(10,7)
-  longitude Decimal @db.Decimal(10,7)
+  location        String  @db.VarChar(300)
+  latitude        Decimal @db.Decimal(10, 7)
+  longitude       Decimal @db.Decimal(10, 7)
   additional_note String? @db.VarChar(500)
 
-  user_id         String
-  user            User @relation(fields: [user_id], references: [user_id])
+  user_id String
+  user    User   @relation(fields: [user_id], references: [user_id])
 
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
 }
 
 model Customer {
@@ -237,7 +258,7 @@ model Customer {
 
   user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
-  points Decimal @default(0) @db.Decimal(10,2)
+  points Decimal @default(0) @db.Decimal(10, 2)
 
   rewardRedemptions RewardRedemption[]
 }
@@ -247,8 +268,8 @@ model Worker {
 
   user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
-  workerRequests      WorkerCollectionRequest[]
-  workerAvailability  WorkerAvailability[]
+  workerRequests     WorkerCollectionRequest[]
+  workerAvailability WorkerAvailability[]
 }
 
 model Admin {
@@ -262,28 +283,30 @@ model Reward {
 
   name String @db.VarChar(100)
 
-  required_points Decimal @db.Decimal(10,2)
+  required_points Decimal @db.Decimal(10, 2)
 
   image String? @db.VarChar(512)
 
   rewardRedemptions RewardRedemption[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
 }
 
 model RewardRedemption {
   redemption_id String @id @default(cuid())
 
-  user_id String
+  user_id  String
   customer Customer @relation(fields: [user_id], references: [user_id])
 
   reward_id String
-  reward Reward @relation(fields: [reward_id], references: [reward_id])
+  reward    Reward @relation(fields: [reward_id], references: [reward_id])
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  points_spent Decimal @db.Decimal(10,2)
+  points_spent Decimal @db.Decimal(10, 2)
 
   status String @db.VarChar(20)
+
+  @@index([user_id, status])
 }
