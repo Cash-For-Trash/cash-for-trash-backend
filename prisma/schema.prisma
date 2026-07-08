@@ -13,6 +13,50 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  CUSTOMER
+  WORKER
+  ADMIN
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+ FAILED
+}
+
+enum CollectionStatus {
+  PENDING
+  ACCEPTED
+  ON_THE_WAY
+  COLLECTED
+  CANCELLED
+}
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum RewardStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DELIVERED
+}
+enum DayOfWeek {
+  SATURDAY
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+}
+
 model PointsTransaction {
   point_id String @id @default(cuid())
 
