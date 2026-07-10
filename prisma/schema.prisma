@@ -14,15 +14,15 @@ datasource db {
 }
 
 enum Role {
-  CUSTOMER
-  WORKER
-  ADMIN
+  customer
+  worker
+  admin
 }
 
 enum PaymentStatus {
   PENDING
   PAID
- FAILED
+  FAILED
 }
 
 enum CollectionStatus {
@@ -32,6 +32,7 @@ enum CollectionStatus {
   COLLECTED
   CANCELLED
 }
+
 enum OrderStatus {
   PENDING
   CONFIRMED
@@ -47,6 +48,7 @@ enum RewardStatus {
   REJECTED
   DELIVERED
 }
+
 enum DayOfWeek {
   SATURDAY
   SUNDAY
@@ -74,8 +76,8 @@ model PointsTransaction {
 model Availability {
   availability_id String @id @default(cuid())
 
-  location    String   @db.VarChar(300)
-  day_of_week String   @db.VarChar(15)
+  location    String    @db.VarChar(300)
+  day_of_week DayOfWeek
   from_time   DateTime
   to_time     DateTime
 
@@ -116,10 +118,10 @@ model CollectionRequest {
   user_id String
   user    User   @relation(fields: [user_id], references: [user_id])
 
-  request_date   DateTime @default(now())
-  quantity       Decimal  @db.Decimal(10, 2)
-  collection_img String?  @db.VarChar(512)
-  status         String   @db.VarChar(40)
+  request_date   DateTime         @default(now())
+  quantity       Decimal          @db.Decimal(10, 2)
+  collection_img String?          @db.VarChar(512)
+  status         CollectionStatus
 
   requestGarbages RequestGarbage[]
   payments        Payment?
@@ -137,8 +139,8 @@ model Payment {
 
   collectionRequest CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
 
-  payment_method String @db.VarChar(60)
-  payment_status String @db.VarChar(40)
+  payment_method String        @db.VarChar(60)
+  payment_status PaymentStatus
 
   payment_date   DateTime @default(now())
   payment_amount Decimal  @db.Decimal(10, 2)
@@ -158,9 +160,9 @@ model Order {
   total_price Decimal @db.Decimal(10, 2)
   final_price Decimal @db.Decimal(10, 2)
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  status     String   @db.VarChar(30)
+  created_at DateTime    @default(now())
+  updated_at DateTime    @updatedAt
+  status     OrderStatus
 
   items OrderItem[]
 
@@ -246,15 +248,17 @@ model User {
   email    String @unique @db.VarChar(255)
   password String @db.VarChar(255)
 
-  mobile      String? @db.VarChar(20)
-  national_id String? @unique @db.VarChar(20)
+  mobile String? @db.VarChar(20)
 
   image String? @db.VarChar(512)
 
-  role String @db.VarChar(20)
+  role Role
 
   otp            String?   @db.VarChar(6)
-  otp_created_at DateTime?
+  otp_expires_at DateTime?
+
+  reset_password_otp            String?   @db.VarChar(6)
+  reset_password_otp_expires_at DateTime?
 
   is_verified Boolean @default(false)
   is_active   Boolean @default(true)
@@ -312,8 +316,17 @@ model Worker {
 
   user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 
+  national_id String @unique @db.VarChar(14)
+
+  is_approved Boolean   @default(false)
+  approved_at DateTime?
+
   workerRequests     WorkerCollectionRequest[]
   workerAvailability WorkerAvailability[]
+
+  created_at DateTime @default(now())
+
+  updated_at DateTime @updatedAt
 }
 
 model Admin {
@@ -350,7 +363,7 @@ model RewardRedemption {
 
   points_spent Decimal @db.Decimal(10, 2)
 
-  status String @db.VarChar(20)
+  status RewardStatus
 
   @@index([user_id, status])
 }

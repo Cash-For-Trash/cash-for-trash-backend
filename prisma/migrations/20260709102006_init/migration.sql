@@ -1,54 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `addresses` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `collection_requests` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `garbage_types` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `garbages` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `schedules` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `workers` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE `addresses` DROP FOREIGN KEY `addresses_userId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `collection_requests` DROP FOREIGN KEY `collection_requests_userId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `collection_requests` DROP FOREIGN KEY `collection_requests_workerId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `garbages` DROP FOREIGN KEY `garbages_garbageTypeId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `garbages` DROP FOREIGN KEY `garbages_requestId_fkey`;
-
--- DropForeignKey
-ALTER TABLE `schedules` DROP FOREIGN KEY `schedules_workerId_fkey`;
-
--- DropTable
-DROP TABLE `addresses`;
-
--- DropTable
-DROP TABLE `collection_requests`;
-
--- DropTable
-DROP TABLE `garbage_types`;
-
--- DropTable
-DROP TABLE `garbages`;
-
--- DropTable
-DROP TABLE `schedules`;
-
--- DropTable
-DROP TABLE `users`;
-
--- DropTable
-DROP TABLE `workers`;
-
 -- CreateTable
 CREATE TABLE `PointsTransaction` (
     `point_id` VARCHAR(191) NOT NULL,
@@ -212,7 +161,7 @@ CREATE TABLE `User` (
     `image` VARCHAR(512) NULL,
     `role` VARCHAR(20) NOT NULL,
     `otp` VARCHAR(6) NULL,
-    `otp_created_at` DATETIME(3) NULL,
+    `otp_expires_at` DATETIME(3) NULL,
     `is_verified` BOOLEAN NOT NULL DEFAULT false,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
