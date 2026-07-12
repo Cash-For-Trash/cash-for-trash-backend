@@ -5,7 +5,6 @@ import {
   deleteUserProfile,
   changePassword,
 } from "../controllers/user_controller.js";
-import { authorize } from "../middlewares/roles_middleware.js";
 import { authenticate, validate } from "../middlewares/auth_middleware.js";
 import {
   UserUpdateValidation,
@@ -91,7 +90,7 @@ router.put(
  *       404:
  *         description: User not found.
  */
-router.delete("/profile", authenticate, authorize("admin"), deleteUserProfile);
+router.delete("/profile", authenticate, deleteUserProfile);
 
 /**
  * @openapi

@@ -34,43 +34,50 @@ export const getUserProfile = async (userId) => {
 
     };  
 
+    export const updateUserProfile = async (userId, updateData) => {
+        const user = await prisma.user.findUnique({
+            where: {
+                user_id: userId,
+            },
+        });
+        if (!user) {
+            throw new AppError("User not found.", 404);
+        }
 
+        const updatedUser = await prisma.user.update({
+            where: {
+                user_id: userId,
+            },
+            data: updateData,
+        });
 
-
-// Update user profile
-export const updateUserProfile = async (userId, updateData) => {
-    const user = await prisma.user.update({
-        where: {
-            user_id: userId,
-        },
-        data: updateData,
-    });
-
-    return {
-        first_name: user.first_name,
-        last_name: user.last_name,
-        mobile: user.mobile,
-        image: user.image,
+        return updatedUser;
     };
-};
 
-// Delete user profile
-export const deleteUserProfile = async (userId) => {
-    const user = await prisma.user.delete({
-        where: {
-            user_id: userId,
-        },
-    });
 
-    return user;
-};
+    export const deleteUserProfile = async (userId,) => {
+        const user = await prisma.user.findUnique({
+            where: {
+                user_id: userId,
+            },
+        });
+        if (!user) {
+            throw new AppError("User not found.", 404);
+        }
+
+        await prisma.user.delete({
+            where: {
+                user_id: userId,
+            },
+        });
+    };
 
 // Change password
 export const ChangePassword = async (
     userId,
     oldPassword,
     newPassword,
-
+    confirmPassword
 ) => {
     const user = await prisma.user.findUnique({
         where: {
@@ -82,6 +89,7 @@ export const ChangePassword = async (
         throw new AppError("User not found.", 404);
     }
 
+    // Check old password
     const isPasswordValid = await comparePassword(
         oldPassword,
         user.password
@@ -89,6 +97,19 @@ export const ChangePassword = async (
 
     if (!isPasswordValid) {
         throw new AppError("Old password is incorrect.", 400);
+    }
+
+    // Prevent using the same password
+    const isSamePassword = await comparePassword(
+        newPassword,
+        user.password
+    );
+
+    if (isSamePassword) {
+        throw new AppError(
+            "New password must be different from the old password.",
+            400
+        );
     }
 
     const hashedPassword = await hashPassword(newPassword);
@@ -102,4 +123,3 @@ export const ChangePassword = async (
         },
     });
 };
-

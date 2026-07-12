@@ -376,7 +376,7 @@ UserUpdateRequest: {
       example: "Abdelnasser",
     },
 
-    telephone: {
+    mobile: {
       type: "string",
       example: "01012345678",
     },
