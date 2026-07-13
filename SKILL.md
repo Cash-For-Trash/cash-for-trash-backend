@@ -153,6 +153,7 @@ Pure, framework-agnostic helper modules. No imports flow upward from here.
 - `otp.js` — OTP generation/expiration/checking.
 - `mail.js` / `mail_template.js` — email sending / HTML templates. Templates are pure functions returning strings, no side effects.
 - `constants.js` — every magic string/number lives here (roles, OTP length, JWT expiry, pagination defaults). **Never hardcode these values in a service or validation file.**
+- `pagination.js` — helper for pagination query parameters and database operations. Any API endpoint that requires pagination must accept `page` and `page_size` query parameters, default to defaults in `constants.js`, and utilize `paginate` from this module.
 
 When a new feature needs a new reusable helper (e.g. image upload, pagination helper), add it here as its own pure module, not inline in a service, but make sure to follow the same naming conventions and architecture then add it in skill md in this section.
 
@@ -194,6 +195,7 @@ Every error response (built once, in `error_middleware.js`, never elsewhere):
 7. Sanity-check: does every async controller have try/catch? Does every service guard clause throw `AppError` with the right status code? Does every Prisma write that touches multiple tables use `$transaction`? Are all imported template/helper functions actually defined and exported where they're imported from?
 8. check `utils/` and reuse it's files if possible, if not create a new file and reuse it's components, but always add that file in `utils/` directory and import it from there.
 9. Always use Constants from `constants.js`.
+10. Import them at `index.js`
 
 ## Known pitfalls in this codebase (avoid repeating them in new code)
 
