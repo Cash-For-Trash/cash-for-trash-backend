@@ -111,3 +111,35 @@ export const verifyEmailTemplate = (name, otp) => {
 
 };
 
+export const resetPasswordTemplate = (name, otp) => {
+
+  return mailLayout(
+    "Reset Your Password",
+
+    `
+      <h2>Hello ${name} 👋</h2>
+
+      <p>
+        We received a request to reset your password for your <strong>Cash For Trash</strong> account.
+      </p>
+
+      <p>
+        Use the following OTP to reset your password:
+      </p>
+
+      <div class="otp">
+        ${otp}
+      </div>
+
+      <p>
+        This code will expire in
+        <strong>10 minutes</strong>.
+      </p>
+
+      <p>
+        If you didn't request a password reset, you can safely ignore this email — your password will remain unchanged.
+      </p>
+    `
+  );
+
+};

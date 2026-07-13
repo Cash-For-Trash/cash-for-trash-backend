@@ -18,7 +18,7 @@ import {
 
 import { sendEmail } from "../utils/mail.js";
 
-import { verifyEmailTemplate } from "../view/mail_template.js";
+import { verifyEmailTemplate, resetPasswordTemplate } from "../view/mail_template.js";
 
 import { ROLES } from "../utils/constants.js";
 
