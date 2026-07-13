@@ -303,6 +303,7 @@ const options = {
                         type: "object",
 
                         properties: {
+
                             success: {
                             type: "boolean",
                             example: true,
@@ -315,47 +316,73 @@ const options = {
 
                             message: {
                             type: "string",
-                            example: "Success",
+                            example: "Operation completed successfully.",
                             },
 
                             data: {
-                            type: "object",
+                            nullable: true,
+                            example: null,
                             },
-                        },
+
                         },
 
-                        ErrorResponse: {
+                        },
+                     ErrorResponse: {
+
                         type: "object",
 
                         properties: {
+
                             success: {
+
                             type: "boolean",
+
                             example: false,
+
                             },
 
                             statusCode: {
+
                             type: "integer",
+
                             example: 400,
+
                             },
 
                             message: {
+
                             type: "string",
+
                             example: "Validation failed",
+
                             },
 
                             errors: {
-                            type: "array",
-                            items: {
-                                type: "object",
+
+                            nullable: true,
+
+                            example: [
+
+                                {
+
+                                path: "email",
+
+                                msg: "Invalid email.",
+
+                                },
+
+                            ],
+
                             },
-                            },
+
                         },
+
                         },
 
 
-      },
-    },
-  },
+                            },
+                            },
+                        },
 
   apis: ["./routes/*.js"],
 };
