@@ -1,7 +1,7 @@
 import { validationResult } from "express-validator";
 import { errorResponse } from "../utils/response.js";
 import jwt from "jsonwebtoken";
-import AppError from "../utils/App_error.js";
+import AppError from "../utils/app_error.js";
 
 
 export const validate = (req, res, next) => {

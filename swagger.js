@@ -298,6 +298,122 @@ const options = {
                         },
                     },
                     },
+               UserProfile: {
+  type: "object",
+
+  properties: {
+    user_id: {
+      type: "string",
+      example: "cmf4k9m5n0000abc123xyz",
+    },
+
+    first_name: {
+      type: "string",
+      example: "Omnia",
+    },
+
+    last_name: {
+      type: "string",
+      example: "Abdelnasser",
+    },
+
+    email: {
+      type: "string",
+      example: "omnia@gmail.com",
+    },
+
+    telephone: {
+      type: "string",
+      example: "01012345678",
+    },
+
+    image: {
+      type: "string",
+      example: "https://example.com/profile.jpg",
+    },
+
+    role: {
+      type: "string",
+      enum: ["customer", "worker", "admin"],
+      example: "customer",
+    },
+
+    points: {
+      type: "number",
+      example: 250,
+    },
+
+    is_verified: {
+      type: "boolean",
+      example: true,
+    },
+
+    created_at: {
+      type: "string",
+      format: "date-time",
+      example: "2026-07-11T10:30:00Z",
+    },
+
+    updated_at: {
+      type: "string",
+      format: "date-time",
+      example: "2026-07-11T11:15:00Z",
+    },
+  },
+},
+
+UserUpdateRequest: {
+  type: "object",
+
+  properties: {
+    first_name: {
+      type: "string",
+      example: "Omnia",
+    },
+
+    last_name: {
+      type: "string",
+      example: "Abdelnasser",
+    },
+
+    mobile: {
+      type: "string",
+      example: "01012345678",
+    },
+
+    image: {
+      type: "string",
+      example: "https://example.com/profile.jpg",
+    },
+  },
+},
+
+ChangePasswordRequest: {
+  type: "object",
+
+  required: [
+    "oldPassword",
+    "newPassword",
+    "confirmPassword",
+  ],
+
+  properties: {
+    oldPassword: {
+      type: "string",
+      example: "OldPassword123",
+    },
+
+    newPassword: {
+      type: "string",
+      example: "NewPassword123",
+    },
+
+    confirmPassword: {
+      type: "string",
+      example: "NewPassword123",
+    },
+  },
+},
 
                        SuccessResponse: {
                         type: "object",

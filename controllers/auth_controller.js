@@ -1,15 +1,19 @@
 import * as authService from "../services/auth_services.js";
 import { successResponse } from "../utils/response.js";
 
-export const register = async (req, res) => {
-  const user = await authService.register(req.body);
+export const register = async (req, res, next) => {
+  try {
+    const user = await authService.register(req.body);
 
-  return successResponse(
-    res,
-    "User registered successfully. Please verify your email using the OTP sent.",
-    user,
-    201
-  );
+    return successResponse(
+      res,
+      "User registered successfully. Please verify your email using the OTP sent.",
+      user,
+      201
+    );
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const verifyOTP = async (req, res, next) => {
