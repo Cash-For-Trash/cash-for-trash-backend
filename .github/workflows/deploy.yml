@@ -19,8 +19,9 @@ jobs:
           script: |
             cd /home/ec2-user/cash-for-trash-backend
 
-            git pull origin main
-
+            git fetch origin
+            git reset --hard origin/main
+            
             npm install
 
             npx prisma generate
