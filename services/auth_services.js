@@ -301,16 +301,16 @@ export const login = async (data) => {
     accessToken,
     refreshToken,
 
-    user: {
-      user_id: user.user_id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-      role: user.role,
-      ...(user.role === ROLES.WORKER && {
-        is_approved: isApproved,
-      }),
-    }
+    // user: {
+    //   user_id: user.user_id,
+    //   first_name: user.first_name,
+    //   last_name: user.last_name,
+    //   email: user.email,
+    //   role: user.role,
+    //   ...(user.role === ROLES.WORKER && {
+    //     is_approved: isApproved,
+    //   }),
+    // }
   };
 
 };
