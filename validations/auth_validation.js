@@ -56,9 +56,16 @@ export const register_validation = [
     .withMessage("Role must be either customer or worker."),
 
     body("national_id")
+    .custom((value, { req }) => {
+      if (req.body.role !== ROLES.WORKER) {
+        if (value !== undefined && value !== null && value !== "") {
+          throw new Error("National ID is only allowed for workers.");
+        }
+      }
+      return true;
+    })
     .if(body("role").equals(ROLES.WORKER))
-    .notEmpty()
-    .withMessage("National ID is required.")
+    .optional({ values: "falsy" })
     .isLength({ min: 14, max: 14 })
     .withMessage("National ID must be exactly 14 digits.")
     .isNumeric()
