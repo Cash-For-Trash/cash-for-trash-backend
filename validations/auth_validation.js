@@ -63,7 +63,7 @@ export const register_validation = [
         }
       }
       return true;
-    })
+     })
     .if(body("role").equals(ROLES.WORKER))
     .optional({ values: "falsy" })
     .isLength({ min: 14, max: 14 })
