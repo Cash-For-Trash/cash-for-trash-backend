@@ -14,6 +14,7 @@ import { isOTPExpired } from "../utils/otp.js";
 import {
   generateAccessToken,
   generateRefreshToken,
+  verifyAccessToken,
 } from "../utils/jwt.js";
 
 import { sendEmail } from "../utils/mail.js";
@@ -301,16 +302,16 @@ export const login = async (data) => {
     accessToken,
     refreshToken,
 
-    // user: {
-    //   user_id: user.user_id,
-    //   first_name: user.first_name,
-    //   last_name: user.last_name,
-    //   email: user.email,
-    //   role: user.role,
-    //   ...(user.role === ROLES.WORKER && {
-    //     is_approved: isApproved,
-    //   }),
-    // }
+    user: {
+      user_id: user.user_id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      role: user.role,
+      ...(user.role === ROLES.WORKER && {
+        is_approved: isApproved,
+      }),
+    }
   };
 
 };
@@ -531,4 +532,15 @@ export const resetPassword = async (data) => {
     email: user.email,
   };
 
+};
+
+export const checkToken = async (data) => {
+  const { token } = data;
+  const decoded = verifyAccessToken(token);
+  return {
+    valid: true,
+    user_id: decoded.user_id,
+    email: decoded.email,
+    role: decoded.role,
+  };
 };

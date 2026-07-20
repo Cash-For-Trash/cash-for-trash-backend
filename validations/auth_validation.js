@@ -184,3 +184,9 @@ export const resetPasswordValidation = [
         }),
 
 ];
+
+export const checkTokenValidation = [
+  body("token")
+    .notEmpty()
+    .withMessage("Token is required.")
+];

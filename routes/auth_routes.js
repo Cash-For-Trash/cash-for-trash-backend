@@ -1,6 +1,6 @@
 import { Router } from "express";
-import {register,verifyOTP,resendOTP,login,refreshToken,logout,forgotPassword,verifyResetPasswordOTP,resetPassword} from "../controllers/auth_controller.js";
-import {register_validation,verifyOTPValidation,resendOTPValidation,login_validation,refresh_token_validation,forgotPasswordValidation,verifyResetPasswordOTPValidation,resetPasswordValidation} from "../validations/auth_validation.js";
+import {register,verifyOTP,resendOTP,login,refreshToken,logout,forgotPassword,verifyResetPasswordOTP,resetPassword,checkToken} from "../controllers/auth_controller.js";
+import {register_validation,verifyOTPValidation,resendOTPValidation,login_validation,refresh_token_validation,forgotPasswordValidation,verifyResetPasswordOTPValidation,resetPasswordValidation,checkTokenValidation} from "../validations/auth_validation.js";
 import { validate, authenticate } from "../middlewares/auth_middleware.js";
 
 const router = Router();
@@ -230,5 +230,39 @@ router.post("/verify-reset-password-otp",verifyResetPasswordOTPValidation,valida
  *         description: User not found.
  */
 router.post("/reset-password",resetPasswordValidation,validate,resetPassword);
+/**
+ * @openapi
+ * /api/auth/check-token:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Verify Access Token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CheckTokenRequest'
+ *     responses:
+ *       200:
+ *         description: Token is valid.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuccessResponse'
+ *       400:
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Invalid or expired token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post("/check-token", checkTokenValidation, validate, checkToken);
 
 export default router;

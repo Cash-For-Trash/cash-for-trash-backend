@@ -166,3 +166,16 @@ export const resetPassword = async (
     }
 
 };
+
+export const checkToken = async (req, res, next) => {
+  try {
+    const result = await authService.checkToken(req.body);
+    return successResponse(
+      res,
+      "Token is valid.",
+      result
+    );
+  } catch (error) {
+    next(error);
+  }
+};

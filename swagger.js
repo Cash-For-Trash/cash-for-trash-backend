@@ -155,15 +155,15 @@ const options = {
             },
             },
  
-            ForgotPasswordRequest: {
+            CheckTokenRequest: {
                 type: "object",
 
-                required: ["email"],
+                required: ["token"],
 
                 properties: {
-                    email: {
+                    token: {
                     type: "string",
-                    example: "rana@test.com",
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
                     },
                 },
                 },
