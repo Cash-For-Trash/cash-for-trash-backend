@@ -14,7 +14,6 @@ import { isOTPExpired } from "../utils/otp.js";
 import {
   generateAccessToken,
   generateRefreshToken,
-  verifyAccessToken,
 } from "../utils/jwt.js";
 
 import { sendEmail } from "../utils/mail.js";
@@ -534,13 +533,11 @@ export const resetPassword = async (data) => {
 
 };
 
-export const checkToken = async (data) => {
-  const { token } = data;
-  const decoded = verifyAccessToken(token);
+export const checkToken = async (user) => {
   return {
     valid: true,
-    user_id: decoded.user_id,
-    email: decoded.email,
-    role: decoded.role,
+    user_id: user.user_id,
+    email: user.email,
+    role: user.role,
   };
 };

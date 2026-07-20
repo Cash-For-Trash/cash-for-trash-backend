@@ -169,7 +169,7 @@ export const resetPassword = async (
 
 export const checkToken = async (req, res, next) => {
   try {
-    const result = await authService.checkToken(req.body);
+    const result = await authService.checkToken(req.user);
     return successResponse(
       res,
       "Token is valid.",

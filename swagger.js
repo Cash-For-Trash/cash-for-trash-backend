@@ -155,19 +155,6 @@ const options = {
             },
             },
  
-            CheckTokenRequest: {
-                type: "object",
-
-                required: ["token"],
-
-                properties: {
-                    token: {
-                    type: "string",
-                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                    },
-                },
-                },
-
             VerifyResetPasswordOTPRequest: {
                 type: "object",
 

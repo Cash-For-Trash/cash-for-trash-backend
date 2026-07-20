@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {register,verifyOTP,resendOTP,login,refreshToken,logout,forgotPassword,verifyResetPasswordOTP,resetPassword,checkToken} from "../controllers/auth_controller.js";
-import {register_validation,verifyOTPValidation,resendOTPValidation,login_validation,refresh_token_validation,forgotPasswordValidation,verifyResetPasswordOTPValidation,resetPasswordValidation,checkTokenValidation} from "../validations/auth_validation.js";
+import {register_validation,verifyOTPValidation,resendOTPValidation,login_validation,refresh_token_validation,forgotPasswordValidation,verifyResetPasswordOTPValidation,resetPasswordValidation} from "../validations/auth_validation.js";
 import { validate, authenticate } from "../middlewares/auth_middleware.js";
 
 const router = Router();
@@ -234,15 +234,11 @@ router.post("/reset-password",resetPasswordValidation,validate,resetPassword);
  * @openapi
  * /api/auth/check-token:
  *   post:
+ *     security:
+ *       - bearerAuth: []
  *     tags:
  *       - Authentication
  *     summary: Verify Access Token
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/CheckTokenRequest'
  *     responses:
  *       200:
  *         description: Token is valid.
@@ -250,12 +246,6 @@ router.post("/reset-password",resetPasswordValidation,validate,resetPassword);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/SuccessResponse'
- *       400:
- *         description: Validation failed.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
  *       401:
  *         description: Invalid or expired token.
  *         content:
@@ -263,6 +253,6 @@ router.post("/reset-password",resetPasswordValidation,validate,resetPassword);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post("/check-token", checkTokenValidation, validate, checkToken);
+router.post("/check-token", authenticate, checkToken);
 
 export default router;
