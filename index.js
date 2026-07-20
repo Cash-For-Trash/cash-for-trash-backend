@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth_routes.js";
 import userRoutes from "./routes/user_routes.js";
+import garbageTypesRoutes from "./routes/garbageType_routes.js"
 import adminRoutes from "./routes/admin_routes.js";
 import { errorHandler } from "./middlewares/error_middleware.js";
 import { swaggerUi, swaggerSpec } from "./swagger.js";
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/garbage-Types",garbageTypesRoutes)
 app.use("/api/admin", adminRoutes);
 
 app.use(
