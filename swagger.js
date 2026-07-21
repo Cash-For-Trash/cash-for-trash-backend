@@ -155,19 +155,6 @@ const options = {
             },
             },
  
-            ForgotPasswordRequest: {
-                type: "object",
-
-                required: ["email"],
-
-                properties: {
-                    email: {
-                    type: "string",
-                    example: "rana@test.com",
-                    },
-                },
-                },
-
             VerifyResetPasswordOTPRequest: {
                 type: "object",
 
