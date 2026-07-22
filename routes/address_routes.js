@@ -38,7 +38,7 @@ const router = Router();
 router.get(
   "/",
   authenticate,
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.ADMIN, ROLES.CUSTOMER),
   getAllUserAddresses
 );
 

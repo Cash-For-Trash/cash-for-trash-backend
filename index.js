@@ -21,9 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/garbage-Types",garbageTypesRoutes)
+app.use("/api/garbage-types", garbageTypesRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/Address",AddressRoutes);
+app.use("/api/addresses", AddressRoutes);
 
 app.use(
   "/api-docs",
