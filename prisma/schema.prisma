@@ -117,6 +117,8 @@ model CollectionRequest {
 
   user_id String
   user    User   @relation(fields: [user_id], references: [user_id])
+  address_id String
+  address Address @relation(fields: [address_id], references: [address_id])
 
   request_date   DateTime         @default(now())
   quantity       Decimal          @db.Decimal(10, 2)
@@ -294,6 +296,7 @@ model Address {
 
   user_id String
   user    User   @relation(fields: [user_id], references: [user_id])
+    collectionRequests CollectionRequest[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

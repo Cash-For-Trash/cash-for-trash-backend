@@ -71,8 +71,9 @@ router.get("/", getAllGarbageTypes);
  */
 router.post(
   "/",
-      authorize(ROLES.ADMIN),
-     upload.single("image"),
+  authenticate,
+  authorize(ROLES.ADMIN),
+  upload.single("image"),
   createGarbageTypeValidation,
   validate,
   createGarbageType
