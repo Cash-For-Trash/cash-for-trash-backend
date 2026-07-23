@@ -10,7 +10,6 @@ export const getListValidation = [
     .isInt({ min: 1 })
     .withMessage("Page size must be a positive integer."),
 ];
-
 export const userIdParamValidation = [
   param("user_id")
     .notEmpty()
