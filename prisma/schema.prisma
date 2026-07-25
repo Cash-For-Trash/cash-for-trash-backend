@@ -74,16 +74,22 @@ model PointsTransaction {
 }
 
 model Availability {
+
   availability_id String @id @default(cuid())
 
-  location    String    @db.VarChar(300)
+  area_id String
+
+  area Area @relation(fields: [area_id],references: [area_id])
+
   day_of_week DayOfWeek
-  from_time   DateTime
-  to_time     DateTime
+
+  from_time DateTime
+
+  to_time DateTime
 
   workerAvailabilities WorkerAvailability[]
 
-  @@index([day_of_week])
+  @@index([area_id, day_of_week])
 }
 
 model GarbageType {
@@ -369,4 +375,23 @@ model RewardRedemption {
   status RewardStatus
 
   @@index([user_id, status])
+}
+
+model Area {
+  area_id String @id @default(cuid())
+
+  name String @unique @db.VarChar(100)
+
+  north_lat Decimal @db.Decimal(10,7)
+  south_lat Decimal @db.Decimal(10,7)
+
+  east_lng Decimal @db.Decimal(10,7)
+  west_lng Decimal @db.Decimal(10,7)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  availabilities Availability[]
+
+  @@index([name])
 }

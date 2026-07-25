@@ -402,6 +402,191 @@ ChangePasswordRequest: {
   },
 },
 
+CreateAreaRequest: {
+    type: "object",
+
+    required: [
+        "name",
+        "north_lat",
+        "south_lat",
+        "east_lng",
+        "west_lng"
+    ],
+
+    properties: {
+
+        name: {
+            type: "string",
+            example: "Qena Downtown"
+        },
+
+        north_lat: {
+            type: "number",
+            example: 26.1745000
+        },
+
+        south_lat: {
+            type: "number",
+            example: 26.1600000
+        },
+
+        east_lng: {
+            type: "number",
+            example: 32.7350000
+        },
+
+        west_lng: {
+            type: "number",
+            example: 32.7100000
+        }
+
+    }
+
+},
+
+UpdateAreaRequest: {
+    type: "object",
+
+    properties: {
+
+        name: {
+            type: "string",
+            example: "Qena Downtown"
+        },
+
+        north_lat: {
+            type: "number",
+            example: 26.1745000
+        },
+
+        south_lat: {
+            type: "number",
+            example: 26.1600000
+        },
+
+        east_lng: {
+            type: "number",
+            example: 32.7350000
+        },
+
+        west_lng: {
+            type: "number",
+            example: 32.7100000
+        }
+
+    }
+},
+
+Area: {
+
+    type: "object",
+
+    properties: {
+
+        area_id: {
+            type: "string",
+            example: "cmrzs04x10000v13sajjz3v2j"
+        },
+
+        name: {
+            type: "string",
+            example: "Qena Downtown"
+        },
+
+        north_lat: {
+            type: "number",
+            example: 26.1745000
+        },
+
+        south_lat: {
+            type: "number",
+            example: 26.1600000
+        },
+
+        east_lng: {
+            type: "number",
+            example: 32.7350000
+        },
+
+        west_lng: {
+            type: "number",
+            example: 32.7100000
+        },
+
+        created_at: {
+            type: "string",
+            format: "date-time"
+        },
+
+        updated_at: {
+            type: "string",
+            format: "date-time"
+        }
+
+    }
+
+},
+
+AreaSuccessResponse: {
+
+    allOf: [
+
+        {
+            $ref: "#/components/schemas/SuccessResponse"
+        },
+
+        {
+            type: "object",
+
+            properties: {
+
+                data: {
+                    $ref: "#/components/schemas/Area"
+                }
+
+            }
+
+        }
+
+    ]
+
+},
+
+AreaListResponse: {
+
+    allOf: [
+
+        {
+            $ref: "#/components/schemas/SuccessResponse"
+        },
+
+        {
+
+            type: "object",
+
+            properties: {
+
+                data: {
+
+                    type: "array",
+
+                    items: {
+
+                        $ref: "#/components/schemas/Area"
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    ]
+
+},
+
+
                        SuccessResponse: {
                         type: "object",
 
