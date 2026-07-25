@@ -83,13 +83,13 @@ model Availability {
 
   day_of_week DayOfWeek
 
-  from_time DateTime
-
-  to_time DateTime
+  from_time DateTime @db.Time
+  to_time   DateTime @db.Time
 
   workerAvailabilities WorkerAvailability[]
 
-  @@index([area_id, day_of_week])
+  @@index([area_id, day_of_week, from_time])
+  @@unique([area_id, day_of_week, from_time, to_time])
 }
 
 model GarbageType {
@@ -138,6 +138,7 @@ model CollectionRequest {
 
   @@index([user_id, request_date])
   @@index([status, request_date])
+  @@index([address_id])
 }
 
 model Payment {
@@ -227,6 +228,7 @@ model WorkerAvailability {
 
   @@id([availability_id, user_id])
   @@index([user_id])
+  @@index([availability_id])
 }
 
 model Notification {
