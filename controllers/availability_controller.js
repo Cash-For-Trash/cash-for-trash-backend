@@ -27,3 +27,47 @@ export const createAvailability = asyncHandler(async (req, res) => {
     );
 
 });
+
+export const getMyAvailabilities = async (req, res) => {
+
+    const data = await availabilityService.getMyAvailabilities(
+        req.user.user_id
+    );
+
+    successResponse(
+        res,
+        data,
+        "Availabilities retrieved successfully."
+    );
+
+};
+
+
+export const updateAvailability = async (req, res, next) => {
+
+    try {
+
+        const availability =
+            await availabilityService.updateAvailability(
+
+                req.user.user_id,
+                req.params.availability_id,
+                req.body
+
+            );
+
+        successResponse(
+
+            res,
+            availability,
+            "Availability updated successfully."
+
+        );
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};

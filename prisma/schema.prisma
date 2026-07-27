@@ -19,6 +19,11 @@ enum Role {
   admin
 }
 
+enum PaymentMethod {
+  MONTHLY
+  CASH
+}
+
 enum PaymentStatus {
   PENDING
   PAID
@@ -27,6 +32,7 @@ enum PaymentStatus {
 
 enum CollectionStatus {
   PENDING
+  NEEDS_RESCHEDULE
   ACCEPTED
   ON_THE_WAY
   COLLECTED
@@ -74,12 +80,11 @@ model PointsTransaction {
 }
 
 model Availability {
-
   availability_id String @id @default(cuid())
 
   area_id String
 
-  area Area @relation(fields: [area_id],references: [area_id])
+  area Area @relation(fields: [area_id], references: [area_id])
 
   day_of_week DayOfWeek
 
@@ -88,8 +93,8 @@ model Availability {
 
   workerAvailabilities WorkerAvailability[]
 
-  @@index([area_id, day_of_week, from_time])
   @@unique([area_id, day_of_week, from_time, to_time])
+  @@index([area_id, day_of_week, from_time])
 }
 
 model GarbageType {
@@ -121,10 +126,10 @@ model RequestGarbage {
 model CollectionRequest {
   collection_request_id String @id @default(cuid())
 
-  user_id String
-  user    User   @relation(fields: [user_id], references: [user_id])
+  user_id    String
+  user       User    @relation(fields: [user_id], references: [user_id])
   address_id String
-  address Address @relation(fields: [address_id], references: [address_id])
+  address    Address @relation(fields: [address_id], references: [address_id])
 
   request_date   DateTime         @default(now())
   quantity       Decimal          @db.Decimal(10, 2)
@@ -134,11 +139,22 @@ model CollectionRequest {
   requestGarbages RequestGarbage[]
   payments        Payment?
 
+  payment_method PaymentMethod
+
+  scheduled_day       DayOfWeek
+  scheduled_from_time DateTime  @db.Time
+  scheduled_to_time   DateTime  @db.Time
+  service_price       Decimal   @db.Decimal(10, 2)
+
+  worker_share Decimal @db.Decimal(10, 2)
+
   workerRequests WorkerCollectionRequest[]
 
   @@index([user_id, request_date])
   @@index([status, request_date])
   @@index([address_id])
+  @@index([scheduled_day])
+  @@index([address_id, scheduled_day])
 }
 
 model Payment {
@@ -148,7 +164,7 @@ model Payment {
 
   collectionRequest CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
 
-  payment_method String        @db.VarChar(60)
+  payment_method PaymentMethod
   payment_status PaymentStatus
 
   payment_date   DateTime @default(now())
@@ -214,9 +230,12 @@ model WorkerCollectionRequest {
 
   worker            Worker            @relation(fields: [user_id], references: [user_id])
   collectionRequest CollectionRequest @relation(fields: [collection_request_id], references: [collection_request_id])
+  assigned_at       DateTime          @default(now())
+  is_current        Boolean           @default(true)
 
   @@id([user_id, collection_request_id])
   @@index([collection_request_id])
+  @@index([user_id, is_current])
 }
 
 model WorkerAvailability {
@@ -302,9 +321,9 @@ model Address {
   longitude       Decimal @db.Decimal(10, 7)
   additional_note String? @db.VarChar(500)
 
-  user_id String
-  user    User   @relation(fields: [user_id], references: [user_id])
-    collectionRequests CollectionRequest[]
+  user_id            String
+  user               User                @relation(fields: [user_id], references: [user_id])
+  collectionRequests CollectionRequest[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -320,6 +339,8 @@ model Customer {
   points Decimal @default(0) @db.Decimal(10, 2)
 
   rewardRedemptions RewardRedemption[]
+
+  subscriptions Subscription[]
 }
 
 model Worker {
@@ -384,16 +405,51 @@ model Area {
 
   name String @unique @db.VarChar(100)
 
-  north_lat Decimal @db.Decimal(10,7)
-  south_lat Decimal @db.Decimal(10,7)
+  north_lat Decimal @db.Decimal(10, 7)
+  south_lat Decimal @db.Decimal(10, 7)
 
-  east_lng Decimal @db.Decimal(10,7)
-  west_lng Decimal @db.Decimal(10,7)
+  east_lng Decimal @db.Decimal(10, 7)
+  west_lng Decimal @db.Decimal(10, 7)
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  service_price Decimal @default(0) @db.Decimal(10,2)
+  is_active     Boolean  @default(true)
 
   availabilities Availability[]
 
   @@index([name])
+  @@index([is_active])
+}
+
+model Subscription {
+  subscription_id String @id @default(cuid())
+
+  user_id String
+
+  customer Customer @relation(fields: [user_id], references: [user_id])
+
+  start_date DateTime
+
+  end_date DateTime
+
+  price Decimal @db.Decimal(10, 2)
+
+  is_active Boolean
+
+  created_at DateTime @default(now())
+
+  updated_at DateTime @updatedAt
+
+  @@index([user_id, is_active])
+}
+
+model PricingSettings {
+  id Int @id @default(1)
+
+  worker_percentage Decimal @db.Decimal(5, 2)
+
+  monthly_subscription_price Decimal @db.Decimal(10, 2)
+
+  updated_at DateTime @updatedAt
 }

@@ -1,8 +1,8 @@
 import { Router } from "express";
 
-import { createAvailability } from "../controllers/availability_controller.js";
+import { createAvailability,getMyAvailabilities,updateAvailability } from "../controllers/availability_controller.js";
 
-import { createAvailabilityValidation } from "../validations/availability_validation.js";
+import { createAvailabilityValidation,updateAvailabilityValidation } from "../validations/availability_validation.js";
 
 import { authenticate, validate } from "../middlewares/auth_middleware.js";
 
@@ -40,5 +40,11 @@ const router = Router();
  *         description: Availability already exists or overlaps.
  */
 router.post("/",authenticate,authorize("worker"),createAvailabilityValidation,validate,createAvailability);
+
+router.get("/my",authenticate,authorize("worker"),getMyAvailabilities);
+
+router.patch("/:availability_id",authenticate,authorize("worker"),updateAvailabilityValidation,validate,updateAvailability);
+
+
 
 export default router;
