@@ -8,6 +8,7 @@ import garbageTypesRoutes from "./routes/garbageType_routes.js"
 import adminRoutes from "./routes/admin_routes.js";
 import AddressRoutes from "./routes/address_routes.js";
 import rewardsRoutes from "./routes/rewards_routes.js";
+import rewardRedeemRoutes from "./routes/rewardRedeem_routes.js";
 import { errorHandler } from "./middlewares/error_middleware.js";
 import { swaggerUi, swaggerSpec } from "./swagger.js";
 
@@ -28,6 +29,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/addresses", AddressRoutes);
 app.use("/api/areas", areaRoutes);
 app.use("/api/rewards", rewardsRoutes);
+app.use("/api/reward-redeems", rewardRedeemRoutes);
 
 app.use("/api-docs",swaggerUi.serve,swaggerUi.setup(swaggerSpec));
 
