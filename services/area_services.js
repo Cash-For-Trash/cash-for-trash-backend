@@ -163,3 +163,50 @@ export const deleteArea = async (
     });
 
 };
+
+export const updateAreaPrice = async (
+    areaId,
+    servicePrice
+) => {
+
+    const area = await prisma.area.findUnique({
+
+        where: {
+
+            area_id: areaId
+
+        }
+
+    });
+
+    if (!area) {
+
+        throw new AppError(
+
+            "Area not found.",
+
+            404
+
+        );
+
+    }
+
+    const updatedArea = await prisma.area.update({
+
+        where: {
+
+            area_id: areaId
+
+        },
+
+        data: {
+
+            service_price: servicePrice
+
+        }
+
+    });
+
+    return updatedArea;
+
+};

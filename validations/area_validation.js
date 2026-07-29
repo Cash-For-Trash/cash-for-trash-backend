@@ -69,3 +69,17 @@ export const areaIdValidation = [
         .trim()
 
 ];
+
+export const updateAreaPriceValidation = [
+
+    param("id")
+        .notEmpty()
+        .withMessage("Area id is required."),
+
+    body("service_price")
+        .notEmpty()
+        .withMessage("Service price is required.")
+        .isFloat({ gt: 0 })
+        .withMessage("Service price must be greater than zero.")
+
+];

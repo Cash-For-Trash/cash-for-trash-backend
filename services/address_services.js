@@ -1,6 +1,7 @@
 import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
 import { ROLES } from "../utils/constants.js";
+import { formatTime } from "../utils/time.js";
 
 const findAreaByCoordinates = async (latitude, longitude) => {
 
@@ -349,5 +350,97 @@ export const deleteAddress = async (
         }
 
     });
+
+};
+
+export const getAvailableSlots = async (
+    userId,
+    address_id
+) => {
+
+    const address = await prisma.address.findFirst({
+
+        where:{
+
+            address_id,
+
+            user_id:userId
+
+        }
+
+    });
+
+    if(!address){
+
+        throw new AppError(
+            "Address not found.",
+            404
+        );
+
+    }
+
+    const area = await findAreaByCoordinates(
+
+        address.latitude,
+        address.longitude
+
+    );
+
+    if(!area){
+
+        throw new AppError(
+            "Service is unavailable in your area.",
+            400
+        );
+
+    }
+
+    const slots = await prisma.availability.findMany({
+
+        where:{
+
+            area_id:area.area_id,
+
+            workerAvailabilities:{
+
+                some:{
+
+                    worker:{
+
+                        is_approved:true
+
+                    }
+
+                }
+
+            }
+
+        },
+
+        orderBy:[
+
+            {
+                day_of_week:"asc"
+            },
+
+            {
+                from_time:"asc"
+            }
+
+        ]
+
+    });
+
+    return slots.map(slot => ({
+
+        availability_id:slot.availability_id,
+
+        day:slot.day_of_week,
+
+        from:formatTime(slot.from_time),
+
+        to:formatTime(slot.to_time)
+
+    }));
 
 };

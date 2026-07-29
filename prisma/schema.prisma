@@ -92,6 +92,7 @@ model Availability {
   to_time   DateTime @db.Time
 
   workerAvailabilities WorkerAvailability[]
+  collectionRequests   CollectionRequest[]
 
   @@unique([area_id, day_of_week, from_time, to_time])
   @@index([area_id, day_of_week, from_time])
@@ -116,8 +117,9 @@ model RequestGarbage {
   garbage_type_id String
   garbageType     GarbageType @relation(fields: [garbage_type_id], references: [garbage_type_id])
 
-  actual_weight Decimal? @db.Decimal(10, 2)
-  earned_points Int?
+  expected_weight Decimal  @db.Decimal(10, 2)
+  actual_weight   Decimal? @db.Decimal(10, 2)
+  earned_points   Int?
 
   @@index([collection_request_id])
   @@index([garbage_type_id])
@@ -148,7 +150,9 @@ model CollectionRequest {
 
   worker_share Decimal @db.Decimal(10, 2)
 
-  workerRequests WorkerCollectionRequest[]
+  workerRequests  WorkerCollectionRequest[]
+  availability_id String
+  availability    Availability              @relation(fields: [availability_id], references: [availability_id])
 
   @@index([user_id, request_date])
   @@index([status, request_date])
@@ -413,7 +417,7 @@ model Area {
 
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
-  service_price Decimal @default(0) @db.Decimal(10,2)
+  service_price Decimal  @default(0) @db.Decimal(10, 2)
   is_active     Boolean  @default(true)
 
   availabilities Availability[]
@@ -450,6 +454,10 @@ model PricingSettings {
   worker_percentage Decimal @db.Decimal(5, 2)
 
   monthly_subscription_price Decimal @db.Decimal(10, 2)
+
+  minimum_collection_weight Decimal @db.Decimal(10, 2)
+
+  maximum_collection_weight Decimal @db.Decimal(10, 2)
 
   updated_at DateTime @updatedAt
 }

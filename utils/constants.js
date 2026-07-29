@@ -41,3 +41,18 @@ export const PAGINATION = {
   DEFAULT_LIMIT: 10,
   MAX_LIMIT: 100,
 };
+
+export const PAYMENT_METHODS = {
+    MONTHLY: "MONTHLY",
+    CASH: "CASH"
+};
+
+export const DAYS_OF_WEEK = {
+    SATURDAY: "SATURDAY",
+    SUNDAY: "SUNDAY",
+    MONDAY: "MONDAY",
+    TUESDAY: "TUESDAY",
+    WEDNESDAY: "WEDNESDAY",
+    THURSDAY: "THURSDAY",
+    FRIDAY: "FRIDAY"
+};

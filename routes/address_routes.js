@@ -5,6 +5,7 @@ import {
   createAddress,
   updateAddress,
   deleteAddress,
+  getAvailableSlots
 } from "../controllers/address_controller.js";
 
 import {
@@ -214,6 +215,35 @@ router.delete(
   authenticate,
   authorize(ROLES.ADMIN, ROLES.CUSTOMER),
   deleteAddress
+);
+/**
+ * @openapi
+ * /api/collection-requests/addresses/{address_id}/availabilities:
+ *   get:
+ *     summary: Get available collection slots by address
+ *     tags:
+ *       - Collection Requests
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: address_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Available slots retrieved successfully.
+ *       404:
+ *         description: Address not found.
+ *       400:
+ *         description: Service unavailable in this area.
+ */
+router.get(
+    "/addresses/:address_id/availabilities",
+    authenticate,
+    authorize(ROLES.CUSTOMER),
+    getAvailableSlots
 );
 
 export default router;

@@ -170,3 +170,43 @@ export const deleteArea = async (
     }
 
 };
+
+export const updateAreaPrice = async (
+    req,
+    res,
+    next
+) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const { service_price } = req.body;
+
+        const area =
+            await AreaService.updateAreaPrice(
+                id,
+                service_price
+            );
+
+        successResponse(
+
+            res,
+
+            "Area price updated successfully.",
+
+            area,
+
+            200
+
+        );
+
+    }
+
+    catch (error) {
+
+        next(error);
+
+    }
+
+};

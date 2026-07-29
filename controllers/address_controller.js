@@ -1,5 +1,6 @@
 import * as AddressServices from "../services/address_services.js";
 import { successResponse } from "../utils/response.js";
+import * as CollectionRequestService from "../services/collection_request.js";
 
 // Get all addresses 
 export const getAllUserAddresses = async (req, res, next) => {
@@ -100,4 +101,29 @@ export const deleteAddress = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const getAvailableSlots = async (req, res, next) => {
+    try {
+
+        const { address_id } = req.params;
+
+        const userId = req.user.user_id;
+
+        const slots =
+            await CollectionRequestService.getAvailableSlots(
+                userId,
+                address_id
+            );
+
+        successResponse(
+            res,
+            "Available slots retrieved successfully.",
+            slots,
+            200
+        );
+
+    } catch (err) {
+        next(err);
+    }
 };
