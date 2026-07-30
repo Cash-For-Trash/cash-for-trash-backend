@@ -438,6 +438,11 @@ CreateAreaRequest: {
         west_lng: {
             type: "number",
             example: 32.7100000
+        },
+
+        service_price: {
+            type: "number",
+            example: 35
         }
 
     }
@@ -472,6 +477,11 @@ UpdateAreaRequest: {
         west_lng: {
             type: "number",
             example: 32.7100000
+        },
+
+        service_price: {
+            type: "number",
+            example: 35
         }
 
     }
@@ -511,6 +521,16 @@ Area: {
         west_lng: {
             type: "number",
             example: 32.7100000
+        },
+
+        service_price: {
+            type: "number",
+            example: 35
+        },
+
+        is_active: {
+            type: "boolean",
+            example: true
         },
 
         created_at: {

@@ -184,7 +184,7 @@ export const updateAreaPrice = async (
         const { service_price } = req.body;
 
         const area =
-            await AreaService.updateAreaPrice(
+            await areaService.updateAreaPrice(
                 id,
                 service_price
             );

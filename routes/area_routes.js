@@ -1,14 +1,15 @@
 import { Router } from "express";
-import {createArea,getAllAreas,getAreaById,updateArea,deleteArea,updateAreaPrice} from "../controllers/area_controller.js";
-import {createAreaValidation,updateAreaValidation,getAreasValidation,areaIdValidation,updateAreaPriceValidation} from "../validations/area_validation.js";
+import { createArea, getAllAreas, getAreaById, updateArea, deleteArea, updateAreaPrice } from "../controllers/area_controller.js";
+import { createAreaValidation, updateAreaValidation, getAreasValidation, areaIdValidation, updateAreaPriceValidation } from "../validations/area_validation.js";
 import { validate, authenticate } from "../middlewares/auth_middleware.js";
 import { authorize } from "../middlewares/roles_middleware.js";
 import { ROLES } from "../utils/constants.js";
+
 const router = Router();
 
 /**
  * @openapi
- * /api/areas/createArea:
+ * /api/areas:
  *   post:
  *     tags:
  *       - Areas
@@ -38,10 +39,11 @@ const router = Router();
  *       409:
  *         description: Area already exists.
  */
-router.post("/createArea",authenticate,authorize("admin"),createAreaValidation,validate,createArea);
+router.post("/", authenticate, authorize(ROLES.ADMIN), createAreaValidation, validate, createArea);
+
 /**
  * @openapi
- * /api/areas/getAllAreas:
+ * /api/areas:
  *   get:
  *     tags:
  *       - Areas
@@ -63,10 +65,11 @@ router.post("/createArea",authenticate,authorize("admin"),createAreaValidation,v
  *             schema:
  *               $ref: '#/components/schemas/AreaListResponse'
  */
-router.get("/getAllAreas",getAreasValidation,validate,getAllAreas);
+router.get("/", getAreasValidation, validate, getAllAreas);
+
 /**
  * @openapi
- * /api/areas/getArea/{id}:
+ * /api/areas/{id}:
  *   get:
  *     tags:
  *       - Areas
@@ -89,10 +92,11 @@ router.get("/getAllAreas",getAreasValidation,validate,getAllAreas);
  *       404:
  *         description: Area not found.
  */
-router.get("/getArea/:id",areaIdValidation,getAreaById);
+router.get("/:id", areaIdValidation, validate, getAreaById);
+
 /**
  * @openapi
- * /api/areas/updateArea/{id}:
+ * /api/areas/{id}:
  *   patch:
  *     tags:
  *       - Areas
@@ -129,10 +133,11 @@ router.get("/getArea/:id",areaIdValidation,getAreaById);
  *       404:
  *         description: Area not found.
  */
-router.patch("/updateArea/:id",authenticate,authorize("admin"),updateAreaValidation,areaIdValidation,validate,updateArea);
+router.patch("/:id", authenticate, authorize(ROLES.ADMIN), updateAreaValidation, areaIdValidation, validate, updateArea);
+
 /**
  * @openapi
- * /api/areas/deleteArea/{id}:
+ * /api/areas/{id}:
  *   delete:
  *     tags:
  *       - Areas
@@ -157,7 +162,8 @@ router.patch("/updateArea/:id",authenticate,authorize("admin"),updateAreaValidat
  *       404:
  *         description: Area not found.
  */
-router.delete("/deleteArea/:id", authenticate, authorize("admin"),areaIdValidation,validate,deleteArea);
+router.delete("/:id", authenticate, authorize(ROLES.ADMIN), areaIdValidation, validate, deleteArea);
+
 /**
  * @openapi
  * /api/areas/{id}/price:
@@ -166,10 +172,8 @@ router.delete("/deleteArea/:id", authenticate, authorize("admin"),areaIdValidati
  *       - Areas
  *     summary: Update area service price
  *     description: Update the service price for a specific area. Admin only.
- *
  *     security:
  *       - bearerAuth: []
- *
  *     parameters:
  *       - in: path
  *         name: id
@@ -177,7 +181,6 @@ router.delete("/deleteArea/:id", authenticate, authorize("admin"),areaIdValidati
  *         schema:
  *           type: string
  *         example: cms0x7nz90001v1y85ddoefwp
- *
  *     requestBody:
  *       required: true
  *       content:
@@ -190,7 +193,6 @@ router.delete("/deleteArea/:id", authenticate, authorize("admin"),areaIdValidati
  *               service_price:
  *                 type: number
  *                 example: 35
- *
  *     responses:
  *       200:
  *         description: Area price updated successfully.
@@ -203,6 +205,6 @@ router.delete("/deleteArea/:id", authenticate, authorize("admin"),areaIdValidati
  *       404:
  *         description: Area not found.
  */
-router.patch("/:id/price",authenticate,authorize(ROLES.ADMIN),updateAreaPriceValidation,validate,updateAreaPrice);
+router.patch("/:id/price", authenticate, authorize(ROLES.ADMIN), updateAreaPriceValidation, validate, updateAreaPrice);
 
 export default router;
