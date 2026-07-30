@@ -81,6 +81,7 @@ router.get("/", getAreasValidation, validate, getAllAreas);
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmrzs04x10000v13sajjz3v2j
  *         description: Area ID
  *     responses:
  *       200:
@@ -110,6 +111,7 @@ router.get("/:id", areaIdValidation, validate, getAreaById);
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmrzs04x10000v13sajjz3v2j
  *         description: Area ID
  *     requestBody:
  *       required: true
@@ -151,6 +153,7 @@ router.patch("/:id", authenticate, authorize(ROLES.ADMIN), updateAreaValidation,
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmrzs04x10000v13sajjz3v2j
  *         description: Area ID
  *     responses:
  *       200:

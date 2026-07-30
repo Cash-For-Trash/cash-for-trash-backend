@@ -402,6 +402,49 @@ ChangePasswordRequest: {
   },
 },
 
+RefreshTokenRequest: {
+  type: "object",
+  required: ["refresh_token"],
+  properties: {
+    refresh_token: {
+      type: "string",
+      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    },
+  },
+},
+
+CreateAvailabilityRequest: {
+  type: "object",
+  required: ["area_id", "day_of_week", "from_time", "to_time"],
+  properties: {
+    area_id: {
+      type: "string",
+      example: "cms0x7nz90001v1y85ddoefwp",
+    },
+    day_of_week: {
+      type: "string",
+      enum: [
+        "SATURDAY",
+        "SUNDAY",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+      ],
+      example: "MONDAY",
+    },
+    from_time: {
+      type: "string",
+      example: "09:00:00",
+    },
+    to_time: {
+      type: "string",
+      example: "12:00:00",
+    },
+  },
+},
+
 CreateAreaRequest: {
     type: "object",
 

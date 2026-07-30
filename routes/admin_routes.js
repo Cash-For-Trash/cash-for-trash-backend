@@ -30,12 +30,14 @@ const router = Router();
  *         schema:
  *           type: integer
  *           default: 1
+ *         example: 1
  *         description: Page number
  *       - in: query
  *         name: page_size
  *         schema:
  *           type: integer
  *           default: 10
+ *         example: 10
  *         description: Number of items per page
  *     responses:
  *       200:
@@ -69,6 +71,7 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmrkvmwr20000utr4aoa4fjeh
  *         description: Customer user ID
  *     responses:
  *       200:
@@ -104,12 +107,14 @@ router.get(
  *         schema:
  *           type: integer
  *           default: 1
+ *         example: 1
  *         description: Page number
  *       - in: query
  *         name: page_size
  *         schema:
  *           type: integer
  *           default: 10
+ *         example: 10
  *         description: Number of items per page
  *     responses:
  *       200:
@@ -143,6 +148,7 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmrkvmwr20000utr4aoa4fjeh
  *         description: Worker user ID
  *     responses:
  *       200:

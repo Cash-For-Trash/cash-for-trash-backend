@@ -32,11 +32,13 @@ const router=Router();
  *             properties:
  *               address_id:
  *                 type: string
+ *                 example: cmrkvmwr20000utr4aoa4fjeh
  *               payment_method:
  *                 type: string
  *                 enum:
  *                   - CASH
  *                   - MONTHLY
+ *                 example: CASH
  *               scheduled_day:
  *                 type: string
  *                 enum:
@@ -47,6 +49,7 @@ const router=Router();
  *                   - WEDNESDAY
  *                   - THURSDAY
  *                   - FRIDAY
+ *                 example: MONDAY
  *               scheduled_from_time:
  *                 type: string
  *                 example: "09:00:00"
@@ -55,8 +58,10 @@ const router=Router();
  *                 example: "12:00:00"
  *               quantity:
  *                 type: number
+ *                 example: 5.5
  *               collection_img:
  *                 type: string
+ *                 example: https://example.com/trash.jpg
  *               garbage_types:
  *                 type: array
  *                 items:
@@ -64,8 +69,10 @@ const router=Router();
  *                   properties:
  *                     garbage_type_id:
  *                       type: string
+ *                       example: cmrkvmwr20000utr4aoa4f999
  *                     expected_weight:
  *                       type: number
+ *                       example: 2.5
  *     responses:
  *       201:
  *         description: Collection Request created successfully.

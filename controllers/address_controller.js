@@ -2,6 +2,22 @@ import * as AddressServices from "../services/address_services.js";
 import { successResponse } from "../utils/response.js";
 import * as CollectionRequestService from "../services/collection_request.js";
 
+// Get all addresses for all Customers
+export const getAllAddressesForAdminsController = async (req, res, next) => {
+    try {
+        const addresses = await AddressServices.getAllAddressesForAdmins();
+
+        successResponse(
+            res,
+            "Addresses retrieved successfully.",
+            addresses,
+            200
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 // Get all addresses 
 export const getAllUserAddresses = async (req, res, next) => {
   try {

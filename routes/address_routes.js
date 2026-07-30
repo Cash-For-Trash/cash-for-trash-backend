@@ -231,6 +231,7 @@ router.delete(
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmrkvmwr20000utr4aoa4fjeh
  *     responses:
  *       200:
  *         description: Available slots retrieved successfully.

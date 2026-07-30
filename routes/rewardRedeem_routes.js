@@ -8,25 +8,20 @@ const router = Router();
 
 /**
  * @openapi
- * /api/reward-redeems:
+ * /api/reward-redeems/{reward_id}:
  *   post:
  *     tags:
  *       - Reward Redeems
  *     summary: Make a reward redeem request
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - reward_id
- *             properties:
- *               reward_id:
- *                 type: string
- *                 example: cmcy2fxf0001abc123xyz
+ *     parameters:
+ *       - in: path
+ *         name: reward_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: cmcy2fxf0001abc123xyz
  *     responses:
  *       201:
  *         description: Reward redeem request created successfully.
@@ -94,6 +89,7 @@ router.get("/my_redemptions",
  *         schema:
  *           type: string
  *         required: true
+ *         example: cmcy2fxf0001abc123xyz
  *         description: Redemption ID
  *     responses:
  *       200:
@@ -123,6 +119,7 @@ router.put("/approve/:redemption_id",
  *         schema:
  *           type: string
  *         required: true
+ *         example: cmcy2fxf0001abc123xyz
  *         description: Redemption ID
  *     responses:
  *       200:

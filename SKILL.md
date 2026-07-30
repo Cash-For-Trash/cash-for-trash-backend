@@ -36,6 +36,7 @@ a util never imports from a service, etc.).
 - Each route is a single line: `router.<verb>(path, ...validationChain, validate, [authenticate], [authorize(...roles)], controllerFn)`.
 - Middleware order is always: validation rules -> `validate` -> `authenticate` (if the route needs a logged-in user) -> `authorize(...)` (if the route is role-restricted) -> controller.
 - Add a `@openapi` JSDoc block above every route: tags, summary, requestBody schema ref, and response codes (include the realistic ones: 400 validation, 401/403 auth, 404 not found, 409 conflict).
+- **Mandatory Examples**: Every parameter (`in: path`, `in: query`), request body property, and schema component property defined in `@openapi` annotations or `swagger.js` **MUST include a realistic `example` field**. Never leave parameters or properties without examples.
 - Never put logic, try/catch, or Prisma calls in a route file. It is pure wiring.
 - Register the new router in the app's central router index the same way `auth_routes.js` is mounted.
 

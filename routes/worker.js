@@ -18,6 +18,7 @@ import { approveWorkerValidation } from "../validations/worker_validation";
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmrkvmwr20000utr4aoa4fjeh
  *     responses:
  *       200:
  *         description: Worker approved successfully.

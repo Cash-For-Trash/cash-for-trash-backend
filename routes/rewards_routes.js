@@ -32,7 +32,7 @@ const router = Router();
  */
 router.get("/", getAllRewardsController);
 
-/*  *
+/**
  * @openapi
  * /api/rewards/{id}:
  *   get:
@@ -115,6 +115,7 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmcy2fxf0001abc123xyz
  *     requestBody:
  *       required: true
  *       content:
@@ -166,6 +167,7 @@ router.put(
  *         required: true
  *         schema:
  *           type: string
+ *         example: cmcy2fxf0001abc123xyz
  *     responses:
  *       200:
  *         description: Reward deleted successfully.

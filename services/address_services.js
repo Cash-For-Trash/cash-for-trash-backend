@@ -34,6 +34,20 @@ const findAreaByCoordinates = async (latitude, longitude) => {
     return area;
 
 };
+
+// get All Addresses for all customers
+export const getAllAddressesForAdmins = async () => {
+    const addresses = await prisma.address.findMany({
+        include: {
+            user: true,
+        },
+        orderBy: {
+            updated_at: "desc",
+        },
+    });
+    return addresses;
+};
+
 // Get all addresses 
 export const getAllAddresses = async (userId) => {
   const addresses = await prisma.address.findMany({
