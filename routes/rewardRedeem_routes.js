@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { createRewardRedeemRequestController, getAllRedemptionRequestsController, getMyRedemptionsController, approveRedemptionRequestController, rejectRedemptionRequestController } from "../controllers/rewardRedeem_controller.js";
-import { authenticate, validate } from "../middlewares/auth_middleware.js";
+import { authenticate } from "../middlewares/auth_middleware.js";
 import { authorize } from "../middlewares/roles_middleware.js";
 import { ROLES } from "../utils/constants.js";
 const router = Router();
@@ -35,7 +35,7 @@ const router = Router();
  *       401:
  *         description: Unauthorized.
  */
-router.post("/create_request",
+router.post("/:reward_id",
     authenticate,  
     createRewardRedeemRequestController);
 
@@ -76,6 +76,7 @@ router.get("/",
  */
 router.get("/my_redemptions", 
     authenticate,
+    
         getMyRedemptionsController);
 
 /**
