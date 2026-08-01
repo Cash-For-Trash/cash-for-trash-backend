@@ -82,9 +82,11 @@ export const createCollectionRequest = async (userId, data) => {
       data: {
         user_id: userId,
         address_id,
+        availability_id,
         quantity,
         collection_img,
         status: "PENDING",
+        payment_method,
         scheduled_day: availability.day_of_week,
         scheduled_from_time: availability.from_time,
         scheduled_to_time: availability.to_time,
@@ -97,6 +99,7 @@ export const createCollectionRequest = async (userId, data) => {
       data: garbage_types.map((item) => ({
         collection_request_id: request.collection_request_id,
         garbage_type_id: item.garbage_type_id,
+        expected_weight: item.estimated_weight || item.expected_weight || 0,
       })),
     });
 
