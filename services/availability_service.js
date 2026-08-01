@@ -51,12 +51,12 @@ const to_time = toTimeDate(data.to_time);
         }
 
         // Rule 4: Worker must be approved
-        if (!worker.is_approved) {
-            throw new AppError(
-                "Worker is not approved yet.",
-                403
-            );
-        }
+        // if (!worker.is_approved) {
+        //     throw new AppError(
+        //         "Worker is not approved yet.",
+        //         403
+        //     );
+        // }
 
         // Rule 5: Prevent overlapping time in the same day
         const overlap = await tx.workerAvailability.findFirst({
