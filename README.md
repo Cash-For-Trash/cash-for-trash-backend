@@ -125,6 +125,7 @@ The application defines three distinct primary roles (`customer`, `worker`, `adm
 
 ### 7. Collection Requests (`/api/collection-requests`)
 - `POST /api/collection-requests`: Create waste collection request with address, schedule, payment method & expected garbage breakdown (`Customer`).
+- `GET /api/collection-requests/addresses/:address_id/availabilities`: Get available collection time slots for a specific customer address (`Customer`).
 
 ### 8. Worker Approval & Management (`/api/workers` & `/api/admin/workers`)
 - `PATCH /api/workers/:id/approve`: Approve worker account using National ID (`Admin`).

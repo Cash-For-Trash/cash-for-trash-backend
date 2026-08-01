@@ -1,15 +1,9 @@
 import { Router } from "express";
 
-import {getPricingSettings,updatePricingSettings} from "../controllers/pricing.controller.js";
-
-import {authenticate} from "../middlewares/auth.middleware.js";
-
-import { authorize } from "../middlewares/role.middleware.js";
-
-import { validate } from "../middlewares/validation.middleware.js";
-
-import { updatePricingValidation } from "../validations/pricing.validation.js";
-
+import { getPricingSettings, updatePricingSettings } from "../controllers/pricing_controller.js";
+import { authenticate, validate } from "../middlewares/auth_middleware.js";
+import { authorize } from "../middlewares/roles_middleware.js";
+import { updatePricingValidation } from "../validations/pricing_validation.js";
 import { ROLES } from "../utils/constants.js";
 
 const router = Router();

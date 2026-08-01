@@ -1,8 +1,12 @@
 import { Router } from "express";
-import { approveWorker } from "../controllers/worker_controller";
-import { ROLES } from "../utils/constants";
+import { approveWorker } from "../controllers/worker_controller.js";
+import { ROLES } from "../utils/constants.js";
 import { authenticate, validate } from "../middlewares/auth_middleware.js";
-import { approveWorkerValidation } from "../validations/worker_validation";
+import { authorize } from "../middlewares/roles_middleware.js";
+import { approveWorkerValidation } from "../validations/worker_validation.js";
+
+const router = Router();
+
 /**
  * @openapi
  * /api/workers/{id}/approve:
@@ -27,4 +31,6 @@ import { approveWorkerValidation } from "../validations/worker_validation";
  *       409:
  *         description: Worker already approved.
  */
-router.patch("/:id/approve",authenticate,authorize(ROLES.ADMIN),approveWorkerValidation,validate,approveWorker);
+router.patch("/:id/approve", authenticate, authorize(ROLES.ADMIN), approveWorkerValidation, validate, approveWorker);
+
+export default router;

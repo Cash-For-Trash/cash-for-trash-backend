@@ -1,73 +1,62 @@
-import * as availabilityService from "../services/availability_service.js";
-import asyncHandler from "../middlewares/error_middleware.js";
+import * as AvailabilityServices from "../services/availability_services.js";
 import { successResponse } from "../utils/response.js";
 
-export const createAvailability = asyncHandler(async (req, res) => {
-
-    const availability = await availabilityService.createAvailability(
-
-        req.user.user_id,
-
-        req.body
-
+export const createAvailability = async (req, res, next) => {
+  try {
+    const availability = await AvailabilityServices.createAvailability(
+      req.user.user_id,
+      req.body
     );
 
-    
-   const response = {
-    ...availability,
-    from_time: availability.from_time.toISOString().substring(11, 19),
-    to_time: availability.to_time.toISOString().substring(11, 19)
+    const responseData = {
+      ...availability,
+      from_time: availability.from_time instanceof Date ? availability.from_time.toISOString().substring(11, 19) : availability.from_time,
+      to_time: availability.to_time instanceof Date ? availability.to_time.toISOString().substring(11, 19) : availability.to_time,
     };
 
     return successResponse(
-        res,
-        response,
-        "Availability created successfully.",
-        201
+      res,
+      "Availability created successfully.",
+      responseData,
+      201
     );
-
-});
-
-export const getMyAvailabilities = async (req, res) => {
-
-    const data = await availabilityService.getMyAvailabilities(
-        req.user.user_id
-    );
-
-    successResponse(
-        res,
-        data,
-        "Availabilities retrieved successfully."
-    );
-
+  } catch (error) {
+    next(error);
+  }
 };
 
+export const getMyAvailabilities = async (req, res, next) => {
+  try {
+    const data = await AvailabilityServices.getMyAvailabilities(
+      req.user.user_id
+    );
+
+    return successResponse(
+      res,
+      "Availabilities retrieved successfully.",
+      data,
+      200
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const updateAvailability = async (req, res, next) => {
+  try {
+    const availability = await AvailabilityServices.updateAvailability(
+      req.user.user_id,
+      req.params.availability_id,
+      req.body
+    );
 
-    try {
-
-        const availability =
-            await availabilityService.updateAvailability(
-
-                req.user.user_id,
-                req.params.availability_id,
-                req.body
-
-            );
-
-        successResponse(
-
-            res,
-            availability,
-            "Availability updated successfully."
-
-        );
-
-    } catch (error) {
-
-        next(error);
-
-    }
-
+    return successResponse(
+      res,
+      "Availability updated successfully.",
+      availability,
+      200
+    );
+  } catch (error) {
+    next(error);
+  }
 };

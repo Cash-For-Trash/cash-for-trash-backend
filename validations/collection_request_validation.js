@@ -37,25 +37,3 @@ export const createCollectionRequestValidation = [
     body("garbage_types.*.estimated_weight")
         .isFloat({ min:0.1 })
 ];
-
-const pricing =
-await prisma.pricingSettings.findFirst();
-
-if(!pricing){
-
-    throw new AppError(
-        "Pricing settings not found.",
-        500
-    );
-
-}
-
-const servicePrice =
-payment_method === "MONTHLY"
-? 0
-: area.service_price;
-
-const workerShare =
-payment_method === "MONTHLY"
-? 0
-: (servicePrice * Number(pricing.worker_percentage)) / 100;

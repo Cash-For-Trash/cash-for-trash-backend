@@ -4,12 +4,15 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth_routes.js";
 import userRoutes from "./routes/user_routes.js";
 import areaRoutes from "./routes/area_routes.js";
-import garbageTypesRoutes from "./routes/garbageType_routes.js"
+import garbageTypesRoutes from "./routes/garbageType_routes.js";
 import adminRoutes from "./routes/admin_routes.js";
-import AddressRoutes from "./routes/address_routes.js";
+import addressRoutes from "./routes/address_routes.js";
 import availabilityRoutes from "./routes/availability_routes.js";
 import rewardsRoutes from "./routes/rewards_routes.js";
 import rewardRedeemRoutes from "./routes/rewardRedeem_routes.js";
+import collectionRequestRoutes from "./routes/collection_request_routes.js";
+import workerRoutes from "./routes/worker_routes.js";
+import pricingRoutes from "./routes/pricing_routes.js";
 import { errorHandler } from "./middlewares/error_middleware.js";
 import { swaggerUi, swaggerSpec } from "./swagger.js";
 
@@ -27,13 +30,16 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/garbage-types", garbageTypesRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/addresses", AddressRoutes);
+app.use("/api/addresses", addressRoutes);
 app.use("/api/areas", areaRoutes);
 app.use("/api/availabilities", availabilityRoutes);
 app.use("/api/rewards", rewardsRoutes);
 app.use("/api/reward-redeems", rewardRedeemRoutes);
+app.use("/api/collection-requests", collectionRequestRoutes);
+app.use("/api/workers", workerRoutes);
+app.use("/api/pricing", pricingRoutes);
 
-app.use("/api-docs",swaggerUi.serve,swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");

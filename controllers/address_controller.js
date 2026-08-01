@@ -1,31 +1,10 @@
 import * as AddressServices from "../services/address_services.js";
 import { successResponse } from "../utils/response.js";
-import * as CollectionRequestService from "../services/collection_request.js";
 
-// Get all addresses for all Customers
 export const getAllAddressesForAdminsController = async (req, res, next) => {
-    try {
-        const addresses = await AddressServices.getAllAddressesForAdmins();
-
-        successResponse(
-            res,
-            "Addresses retrieved successfully.",
-            addresses,
-            200
-        );
-    } catch (error) {
-        next(error);
-    }
-};
-
-// Get all addresses 
-export const getAllUserAddresses = async (req, res, next) => {
   try {
-    const userId = req.user.user_id;
-
-    const addresses = await AddressServices.getAllAddresses(userId);
-
-    successResponse(
+    const addresses = await AddressServices.getAllAddressesForAdmins();
+    return successResponse(
       res,
       "Addresses retrieved successfully.",
       addresses,
@@ -36,16 +15,30 @@ export const getAllUserAddresses = async (req, res, next) => {
   }
 };
 
-// Get address by id
+export const getAllUserAddresses = async (req, res, next) => {
+  try {
+    const userId = req.user.user_id;
+    const addresses = await AddressServices.getAllAddresses(userId);
+    return successResponse(
+      res,
+      "Addresses retrieved successfully.",
+      addresses,
+      200
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getUserAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user.user_id;
-    const role=req.user.role;
+    const role = req.user.role;
 
-    const address = await AddressServices.getAddressById(id, userId,role);
+    const address = await AddressServices.getAddressById(id, userId, role);
 
-    successResponse(
+    return successResponse(
       res,
       "Address retrieved successfully.",
       address,
@@ -56,7 +49,6 @@ export const getUserAddress = async (req, res, next) => {
   }
 };
 
-// Create address
 export const createAddress = async (req, res, next) => {
   try {
     const userId = req.user.user_id;
@@ -66,7 +58,7 @@ export const createAddress = async (req, res, next) => {
       req.body
     );
 
-    successResponse(
+    return successResponse(
       res,
       "Address created successfully.",
       newAddress,
@@ -77,7 +69,6 @@ export const createAddress = async (req, res, next) => {
   }
 };
 
-// Update address
 export const updateAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -89,7 +80,7 @@ export const updateAddress = async (req, res, next) => {
       req.body
     );
 
-    successResponse(
+    return successResponse(
       res,
       "Address updated successfully.",
       updatedAddress,
@@ -100,15 +91,14 @@ export const updateAddress = async (req, res, next) => {
   }
 };
 
-// Delete address
 export const deleteAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userId = req.user.user_id;
-     const role=req.user.role;
-    await AddressServices.deleteAddress(id, userId,role);
+    const role = req.user.role;
+    await AddressServices.deleteAddress(id, userId, role);
 
-    successResponse(
+    return successResponse(
       res,
       "Address deleted successfully.",
       null,
@@ -120,26 +110,22 @@ export const deleteAddress = async (req, res, next) => {
 };
 
 export const getAvailableSlots = async (req, res, next) => {
-    try {
+  try {
+    const { address_id } = req.params;
+    const userId = req.user.user_id;
 
-        const { address_id } = req.params;
+    const slots = await AddressServices.getAvailableSlots(
+      userId,
+      address_id
+    );
 
-        const userId = req.user.user_id;
-
-        const slots =
-            await CollectionRequestService.getAvailableSlots(
-                userId,
-                address_id
-            );
-
-        successResponse(
-            res,
-            "Available slots retrieved successfully.",
-            slots,
-            200
-        );
-
-    } catch (err) {
-        next(err);
-    }
+    return successResponse(
+      res,
+      "Available slots retrieved successfully.",
+      slots,
+      200
+    );
+  } catch (err) {
+    next(err);
+  }
 };

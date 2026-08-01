@@ -1,5 +1,4 @@
-import * as CollectionRequestService
-from "../services/collection_request_service.js";
+import * as CollectionRequestServices from "../services/collection_request_services.js";
 
 import { successResponse }from "../utils/response.js";
 
@@ -11,8 +10,7 @@ export const createCollectionRequest = async (
 
     try{
 
-        const request =
-        await CollectionRequestService.createCollectionRequest(
+        const request = await CollectionRequestServices.createCollectionRequest(
 
             req.user.user_id,
 

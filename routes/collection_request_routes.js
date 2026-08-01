@@ -1,11 +1,45 @@
-import {Router} from "express";
+import { Router } from "express";
 
-import {createCollectionRequest}from "../controllers/collection_request_controller.js";
-import {createCollectionRequestValidation}from "../validations/collection_request_validation.js";
-import {authenticate,validate}from "../middlewares/auth_middleware.js";
-import {authorize}from "../middlewares/roles_middleware.js";
+import { createCollectionRequest } from "../controllers/collection_request_controller.js";
+import { getAvailableSlots } from "../controllers/address_controller.js";
+import { createCollectionRequestValidation } from "../validations/collection_request_validation.js";
+import { authenticate, validate } from "../middlewares/auth_middleware.js";
+import { authorize } from "../middlewares/roles_middleware.js";
+import { ROLES } from "../utils/constants.js";
 
-const router=Router();
+const router = Router();
+
+/**
+ * @openapi
+ * /api/collection-requests/addresses/{address_id}/availabilities:
+ *   get:
+ *     summary: Get available collection slots by address
+ *     tags:
+ *       - Collection Requests
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: address_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: cmrkvmwr20000utr4aoa4fjeh
+ *     responses:
+ *       200:
+ *         description: Available slots retrieved successfully.
+ *       404:
+ *         description: Address not found.
+ *       400:
+ *         description: Service unavailable in this area.
+ */
+router.get(
+  "/addresses/:address_id/availabilities",
+  authenticate,
+  authorize(ROLES.CUSTOMER),
+  getAvailableSlots
+);
+
 /**
  * @openapi
  * /api/collection-requests:
@@ -77,6 +111,13 @@ const router=Router();
  *       201:
  *         description: Collection Request created successfully.
  */
-router.post("/",authenticate,authorize("customer"),createCollectionRequestValidation,validate,createCollectionRequest);
+router.post(
+  "/",
+  authenticate,
+  authorize(ROLES.CUSTOMER),
+  createCollectionRequestValidation,
+  validate,
+  createCollectionRequest
+);
 
 export default router;

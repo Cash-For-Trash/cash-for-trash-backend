@@ -12,7 +12,7 @@ import upload from "../middlewares/upload_middleware.js";
 import {
   createGarbageTypeValidation,
   updateGarbageTypeValidation,
-} from "../validations/grabageType_validation.js"
+} from "../validations/garbageType_validation.js";
 
 import { ROLES } from "../utils/constants.js";
 

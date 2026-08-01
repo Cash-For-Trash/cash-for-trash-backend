@@ -5,13 +5,12 @@ import {
   createAddress,
   updateAddress,
   deleteAddress,
-  getAvailableSlots
 } from "../controllers/address_controller.js";
 
 import {
   createAddressValidation,
   updateAddressValidation,
-} from "../validations/address_valiadtion.js";
+} from "../validations/address_validation.js";
 
 import { authenticate, validate } from "../middlewares/auth_middleware.js";
 import { authorize } from "../middlewares/roles_middleware.js";
@@ -123,7 +122,7 @@ router.post(
 router.get(
   "/:id",
   authenticate,
-authorize(ROLES.ADMIN, ROLES.CUSTOMER),
+  authorize(ROLES.ADMIN, ROLES.CUSTOMER),
   getUserAddress
 );
 
@@ -215,36 +214,6 @@ router.delete(
   authenticate,
   authorize(ROLES.ADMIN, ROLES.CUSTOMER),
   deleteAddress
-);
-/**
- * @openapi
- * /api/collection-requests/addresses/{address_id}/availabilities:
- *   get:
- *     summary: Get available collection slots by address
- *     tags:
- *       - Collection Requests
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: address_id
- *         required: true
- *         schema:
- *           type: string
- *         example: cmrkvmwr20000utr4aoa4fjeh
- *     responses:
- *       200:
- *         description: Available slots retrieved successfully.
- *       404:
- *         description: Address not found.
- *       400:
- *         description: Service unavailable in this area.
- */
-router.get(
-    "/addresses/:address_id/availabilities",
-    authenticate,
-    authorize(ROLES.CUSTOMER),
-    getAvailableSlots
 );
 
 export default router;
