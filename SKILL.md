@@ -197,12 +197,14 @@ Every error response (built once, in `error_middleware.js`, never elsewhere):
 8. check `utils/` and reuse it's files if possible, if not create a new file and reuse it's components, but always add that file in `utils/` directory and import it from there.
 9. Always use Constants from `constants.js`.
 10. Import them at `index.js`
+11. Update `README.md`: Whenever creating a new feature or modifying an existing REST endpoint/feature, ALWAYS add or update its explanation, endpoints, roles, and workflow details in `README.md`.
 
 ## Known pitfalls in this codebase (avoid repeating them in new code)
 
 - A controller missing try/catch will silently break error handling — always double check every async controller function has it, even simple ones.
 - Don't reference a helper function (e.g. an email template) without confirming it's actually exported from its module — a typo'd or missing export throws a `ReferenceError` at runtime, not a caught `AppError`.
 - Don't leak raw Prisma rows in a response — always hand-pick the fields to return, especially excluding `password`, OTPs, and internal tokens.
+- Forgetting to update `README.md` when adding/modifying endpoints or business features.
 
 ---
 
@@ -212,3 +214,4 @@ Every error response (built once, in `error_middleware.js`, never elsewhere):
 - Try to make the code more readable and maintainable.
 - If you want to refactor any thing that didn't written in this file, ask me first and if I said to you do it and refactor the skill file then do that.
 - Don't add any comment while writing the code.
+- ALWAYS update `README.md` whenever adding or modifying features in the app.

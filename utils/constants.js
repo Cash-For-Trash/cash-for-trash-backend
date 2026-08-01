@@ -30,7 +30,7 @@ export const OTP = {
 // JWT
 
 export const JWT = {
-  ACCESS_TOKEN_EXPIRES: "15m",
+  ACCESS_TOKEN_EXPIRES: "80m",
   REFRESH_TOKEN_EXPIRES: "7d",
 };
 
