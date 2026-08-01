@@ -19,14 +19,10 @@ const options = {
       { name: "Authentication", description: "User registration, login, OTP verification, password reset & tokens" },
       { name: "User", description: "Profile management & user notifications" },
       { name: "Addresses", description: "Customer pickup address management" },
-      { name: "Coverage Areas", description: "Geofenced coverage areas & base prices" },
-      { name: "Time Availabilities", description: "Area pickup time slots" },
       { name: "Garbage Types", description: "Recyclable waste categories & pricing per kg" },
       { name: "Collection Requests", description: "Waste collection scheduling & pickup management" },
       { name: "Admin", description: "Worker approval, user monitoring & admin operations" },
       { name: "Rewards", description: "Rewards catalog management" },
-      { name: "Reward Redemptions", description: "Customer reward claims & approval processing" },
-      { name: "Pricing Settings", description: "Global pricing configuration & worker shares" },
     ],
     components: {
       securitySchemes: {
