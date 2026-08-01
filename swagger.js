@@ -4,26 +4,30 @@ import swaggerUi from "swagger-ui-express";
 const options = {
   definition: {
     openapi: "3.0.0",
-
     info: {
       title: "Cash For Trash API",
       version: "1.0.0",
-      description: "API Documentation for Cash For Trash Backend",
+      description: "RESTful API documentation for Cash For Trash backend platform",
     },
-
     servers: [
       {
         url: "http://localhost:3000",
+        description: "Local Development Server",
       },
     ],
-
     tags: [
-    {
-        name: "Authentication",
-        description: "Authentication APIs",
-    },
+      { name: "Authentication", description: "User registration, login, OTP verification, password reset & tokens" },
+      { name: "User", description: "Profile management & user notifications" },
+      { name: "Addresses", description: "Customer pickup address management" },
+      { name: "Coverage Areas", description: "Geofenced coverage areas & base prices" },
+      { name: "Time Availabilities", description: "Area pickup time slots" },
+      { name: "Garbage Types", description: "Recyclable waste categories & pricing per kg" },
+      { name: "Collection Requests", description: "Waste collection scheduling & pickup management" },
+      { name: "Admin", description: "Worker approval, user monitoring & admin operations" },
+      { name: "Rewards", description: "Rewards catalog management" },
+      { name: "Reward Redemptions", description: "Customer reward claims & approval processing" },
+      { name: "Pricing Settings", description: "Global pricing configuration & worker shares" },
     ],
-
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -32,12 +36,9 @@ const options = {
           bearerFormat: "JWT",
         },
       },
-
       schemas: {
-
         RegisterRequest: {
           type: "object",
-
           required: [
             "first_name",
             "last_name",
@@ -46,38 +47,13 @@ const options = {
             "confirm_password",
             "role",
           ],
-
           properties: {
-            first_name: {
-              type: "string",
-              example: "Rana",
-            },
-
-            last_name: {
-              type: "string",
-              example: "Ahmed",
-            },
-
-            email: {
-              type: "string",
-              example: "rana@test.com",
-            },
-
-            password: {
-              type: "string",
-              example: "Rana1234",
-            },
-
-            confirm_password: {
-              type: "string",
-              example: "Rana1234",
-            },
-
-            mobile: {
-              type: "string",
-              example: "01012345678",
-            },
-
+            first_name: { type: "string", example: "Rana" },
+            last_name: { type: "string", example: "Ahmed" },
+            email: { type: "string", example: "rana@test.com" },
+            password: { type: "string", example: "Rana1234" },
+            confirm_password: { type: "string", example: "Rana1234" },
+            mobile: { type: "string", example: "01012345678" },
             role: {
               type: "string",
               enum: ["customer", "worker"],
@@ -85,658 +61,197 @@ const options = {
             },
           },
         },
-
         VerifyOTPRequest: {
           type: "object",
-
           required: ["email", "otp"],
-
           properties: {
-            email: {
-              type: "string",
-              example: "rana@test.com",
-            },
-
-            otp: {
-              type: "string",
-              example: "123456",
-            },
+            email: { type: "string", example: "rana@test.com" },
+            otp: { type: "string", example: "123456" },
           },
         },
-
         ResendOTPRequest: {
           type: "object",
-
           required: ["email"],
-
           properties: {
-            email: {
+            email: { type: "string", example: "rana@test.com" },
+          },
+        },
+        LoginRequest: {
+          type: "object",
+          required: ["email", "password"],
+          properties: {
+            email: { type: "string", example: "rana@test.com" },
+            password: { type: "string", example: "Rana1234" },
+          },
+        },
+        ForgotPasswordRequest: {
+          type: "object",
+          required: ["email"],
+          properties: {
+            email: { type: "string", example: "rana@test.com" },
+          },
+        },
+        VerifyResetPasswordOTPRequest: {
+          type: "object",
+          required: ["email", "otp"],
+          properties: {
+            email: { type: "string", example: "rana@test.com" },
+            otp: { type: "string", example: "123456" },
+          },
+        },
+        ResetPasswordRequest: {
+          type: "object",
+          required: ["email", "otp", "new_password", "confirm_password"],
+          properties: {
+            email: { type: "string", example: "rana@test.com" },
+            otp: { type: "string", example: "123456" },
+            new_password: { type: "string", example: "Rana1234" },
+            confirm_password: { type: "string", example: "Rana1234" },
+          },
+        },
+        User: {
+          type: "object",
+          properties: {
+            user_id: { type: "string", example: "cmrabc123" },
+            first_name: { type: "string", example: "Rana" },
+            last_name: { type: "string", example: "Ahmed" },
+            email: { type: "string", example: "rana@test.com" },
+            role: { type: "string", example: "customer" },
+            is_verified: { type: "boolean", example: true },
+          },
+        },
+        UserProfile: {
+          type: "object",
+          properties: {
+            user_id: { type: "string", example: "cmf4k9m5n0000abc123xyz" },
+            first_name: { type: "string", example: "Omnia" },
+            last_name: { type: "string", example: "Abdelnasser" },
+            email: { type: "string", example: "omnia@gmail.com" },
+            telephone: { type: "string", example: "01012345678" },
+            image: { type: "string", example: "https://example.com/profile.jpg" },
+            role: {
               type: "string",
-              example: "rana@test.com",
+              enum: ["customer", "worker", "admin"],
+              example: "customer",
+            },
+            points: { type: "number", example: 250 },
+            is_verified: { type: "boolean", example: true },
+            created_at: { type: "string", format: "date-time", example: "2026-07-11T10:30:00Z" },
+            updated_at: { type: "string", format: "date-time", example: "2026-07-11T11:15:00Z" },
+          },
+        },
+        UserUpdateRequest: {
+          type: "object",
+          properties: {
+            first_name: { type: "string", example: "Omnia" },
+            last_name: { type: "string", example: "Abdelnasser" },
+            mobile: { type: "string", example: "01012345678" },
+            image: { type: "string", example: "https://example.com/profile.jpg" },
+          },
+        },
+        ChangePasswordRequest: {
+          type: "object",
+          required: ["oldPassword", "newPassword", "confirmPassword"],
+          properties: {
+            oldPassword: { type: "string", example: "OldPassword123" },
+            newPassword: { type: "string", example: "NewPassword123" },
+            confirmPassword: { type: "string", example: "NewPassword123" },
+          },
+        },
+        RefreshTokenRequest: {
+          type: "object",
+          required: ["refresh_token"],
+          properties: {
+            refresh_token: {
+              type: "string",
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
             },
           },
         },
-
-        LoginRequest: {
-        type: "object",
-
-        required: [
-            "email",
-            "password"
-        ],
-
-        properties: {
-
-            email: {
-            type: "string",
-            example: "rana@test.com"
+        CreateAvailabilityRequest: {
+          type: "object",
+          required: ["area_id", "day_of_week", "from_time", "to_time"],
+          properties: {
+            area_id: { type: "string", example: "cms0x7nz90001v1y85ddoefwp" },
+            day_of_week: {
+              type: "string",
+              enum: [
+                "SATURDAY",
+                "SUNDAY",
+                "MONDAY",
+                "TUESDAY",
+                "WEDNESDAY",
+                "THURSDAY",
+                "FRIDAY",
+              ],
+              example: "MONDAY",
             },
-
-            password: {
-            type: "string",
-            example: "Rana1234"
-            }
-
-        }
-
+            from_time: { type: "string", example: "09:00:00" },
+            to_time: { type: "string", example: "12:00:00" },
+          },
         },
-
-     
-        ForgotPasswordRequest: {
-            type: "object",
-
-            required: ["email"],
-
-            properties: {
-                email: {
-                type: "string",
-                example: "rana@test.com",
-                },
+        CreateAreaRequest: {
+          type: "object",
+          required: ["name", "north_lat", "south_lat", "east_lng", "west_lng"],
+          properties: {
+            name: { type: "string", example: "Qena Downtown" },
+            north_lat: { type: "number", example: 26.1745 },
+            south_lat: { type: "number", example: 26.16 },
+            east_lng: { type: "number", example: 32.735 },
+            west_lng: { type: "number", example: 32.71 },
+            service_price: { type: "number", example: 35 },
+          },
+        },
+        UpdateAreaRequest: {
+          type: "object",
+          properties: {
+            name: { type: "string", example: "Qena Downtown" },
+            north_lat: { type: "number", example: 26.1745 },
+            south_lat: { type: "number", example: 26.16 },
+            east_lng: { type: "number", example: 32.735 },
+            west_lng: { type: "number", example: 32.71 },
+            service_price: { type: "number", example: 35 },
+          },
+        },
+        Area: {
+          type: "object",
+          properties: {
+            area_id: { type: "string", example: "cmrzs04x10000v13sajjz3v2j" },
+            name: { type: "string", example: "Qena Downtown" },
+            north_lat: { type: "number", example: 26.1745 },
+            south_lat: { type: "number", example: 26.16 },
+            east_lng: { type: "number", example: 32.735 },
+            west_lng: { type: "number", example: 32.71 },
+            service_price: { type: "number", example: 35 },
+            is_active: { type: "boolean", example: true },
+            created_at: { type: "string", format: "date-time" },
+            updated_at: { type: "string", format: "date-time" },
+          },
+        },
+        SuccessResponse: {
+          type: "object",
+          properties: {
+            success: { type: "boolean", example: true },
+            statusCode: { type: "integer", example: 200 },
+            message: { type: "string", example: "Operation completed successfully." },
+            data: { nullable: true, example: null },
+          },
+        },
+        ErrorResponse: {
+          type: "object",
+          properties: {
+            success: { type: "boolean", example: false },
+            statusCode: { type: "integer", example: 400 },
+            message: { type: "string", example: "Validation failed" },
+            errors: {
+              nullable: true,
+              example: [{ path: "email", msg: "Invalid email." }],
             },
-            },
- 
-            VerifyResetPasswordOTPRequest: {
-                type: "object",
-
-                required: [
-                    "email",
-                    "otp",
-                ],
-
-                properties: {
-                    email: {
-                    type: "string",
-                    example: "rana@test.com",
-                    },
-
-                    otp: {
-                    type: "string",
-                    example: "123456",
-                    },
-                },
-                },
- 
-                ResetPasswordRequest: {
-
-                type: "object",
-
-                required: [
-
-                    "email",
-
-                    "otp",
-
-                    "new_password",
-
-                    "confirm_password",
-
-                ],
-
-                properties: {
-
-                    email: {
-
-                    type: "string",
-
-                    example: "rana@test.com",
-
-                    },
-
-                    otp: {
-
-                    type: "string",
-
-                    example: "123456",
-
-                    },
-
-                    new_password: {
-
-                    type: "string",
-
-                    example: "Rana1234",
-
-                    },
-
-                    confirm_password: {
-
-                    type: "string",
-
-                    example: "Rana1234",
-
-                    },
-
-                },
-
-                },
-
-                User: {
-
-                    type: "object",
-
-                    properties: {
-
-                        user_id: {
-
-                        type: "string",
-
-                        example: "cmrabc123",
-
-                        },
-
-                        first_name: {
-
-                        type: "string",
-
-                        example: "Rana",
-
-                        },
-
-                        last_name: {
-
-                        type: "string",
-
-                        example: "Ahmed",
-
-                        },
-
-                        email: {
-
-                        type: "string",
-
-                        example: "rana@test.com",
-
-                        },
-
-                        role: {
-
-                        type: "string",
-
-                        example: "customer",
-
-                        },
-
-                        is_verified: {
-
-                        type: "boolean",
-
-                        example: true,
-
-                        },
-                    },
-                    },
-               UserProfile: {
-  type: "object",
-
-  properties: {
-    user_id: {
-      type: "string",
-      example: "cmf4k9m5n0000abc123xyz",
-    },
-
-    first_name: {
-      type: "string",
-      example: "Omnia",
-    },
-
-    last_name: {
-      type: "string",
-      example: "Abdelnasser",
-    },
-
-    email: {
-      type: "string",
-      example: "omnia@gmail.com",
-    },
-
-    telephone: {
-      type: "string",
-      example: "01012345678",
-    },
-
-    image: {
-      type: "string",
-      example: "https://example.com/profile.jpg",
-    },
-
-    role: {
-      type: "string",
-      enum: ["customer", "worker", "admin"],
-      example: "customer",
-    },
-
-    points: {
-      type: "number",
-      example: 250,
-    },
-
-    is_verified: {
-      type: "boolean",
-      example: true,
-    },
-
-    created_at: {
-      type: "string",
-      format: "date-time",
-      example: "2026-07-11T10:30:00Z",
-    },
-
-    updated_at: {
-      type: "string",
-      format: "date-time",
-      example: "2026-07-11T11:15:00Z",
+          },
+        },
+      },
     },
   },
-},
-
-UserUpdateRequest: {
-  type: "object",
-
-  properties: {
-    first_name: {
-      type: "string",
-      example: "Omnia",
-    },
-
-    last_name: {
-      type: "string",
-      example: "Abdelnasser",
-    },
-
-    mobile: {
-      type: "string",
-      example: "01012345678",
-    },
-
-    image: {
-      type: "string",
-      example: "https://example.com/profile.jpg",
-    },
-  },
-},
-
-ChangePasswordRequest: {
-  type: "object",
-
-  required: [
-    "oldPassword",
-    "newPassword",
-    "confirmPassword",
-  ],
-
-  properties: {
-    oldPassword: {
-      type: "string",
-      example: "OldPassword123",
-    },
-
-    newPassword: {
-      type: "string",
-      example: "NewPassword123",
-    },
-
-    confirmPassword: {
-      type: "string",
-      example: "NewPassword123",
-    },
-  },
-},
-
-RefreshTokenRequest: {
-  type: "object",
-  required: ["refresh_token"],
-  properties: {
-    refresh_token: {
-      type: "string",
-      example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    },
-  },
-},
-
-CreateAvailabilityRequest: {
-  type: "object",
-  required: ["area_id", "day_of_week", "from_time", "to_time"],
-  properties: {
-    area_id: {
-      type: "string",
-      example: "cms0x7nz90001v1y85ddoefwp",
-    },
-    day_of_week: {
-      type: "string",
-      enum: [
-        "SATURDAY",
-        "SUNDAY",
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-      ],
-      example: "MONDAY",
-    },
-    from_time: {
-      type: "string",
-      example: "09:00:00",
-    },
-    to_time: {
-      type: "string",
-      example: "12:00:00",
-    },
-  },
-},
-
-CreateAreaRequest: {
-    type: "object",
-
-    required: [
-        "name",
-        "north_lat",
-        "south_lat",
-        "east_lng",
-        "west_lng"
-    ],
-
-    properties: {
-
-        name: {
-            type: "string",
-            example: "Qena Downtown"
-        },
-
-        north_lat: {
-            type: "number",
-            example: 26.1745000
-        },
-
-        south_lat: {
-            type: "number",
-            example: 26.1600000
-        },
-
-        east_lng: {
-            type: "number",
-            example: 32.7350000
-        },
-
-        west_lng: {
-            type: "number",
-            example: 32.7100000
-        },
-
-        service_price: {
-            type: "number",
-            example: 35
-        }
-
-    }
-
-},
-
-UpdateAreaRequest: {
-    type: "object",
-
-    properties: {
-
-        name: {
-            type: "string",
-            example: "Qena Downtown"
-        },
-
-        north_lat: {
-            type: "number",
-            example: 26.1745000
-        },
-
-        south_lat: {
-            type: "number",
-            example: 26.1600000
-        },
-
-        east_lng: {
-            type: "number",
-            example: 32.7350000
-        },
-
-        west_lng: {
-            type: "number",
-            example: 32.7100000
-        },
-
-        service_price: {
-            type: "number",
-            example: 35
-        }
-
-    }
-},
-
-Area: {
-
-    type: "object",
-
-    properties: {
-
-        area_id: {
-            type: "string",
-            example: "cmrzs04x10000v13sajjz3v2j"
-        },
-
-        name: {
-            type: "string",
-            example: "Qena Downtown"
-        },
-
-        north_lat: {
-            type: "number",
-            example: 26.1745000
-        },
-
-        south_lat: {
-            type: "number",
-            example: 26.1600000
-        },
-
-        east_lng: {
-            type: "number",
-            example: 32.7350000
-        },
-
-        west_lng: {
-            type: "number",
-            example: 32.7100000
-        },
-
-        service_price: {
-            type: "number",
-            example: 35
-        },
-
-        is_active: {
-            type: "boolean",
-            example: true
-        },
-
-        created_at: {
-            type: "string",
-            format: "date-time"
-        },
-
-        updated_at: {
-            type: "string",
-            format: "date-time"
-        }
-
-    }
-
-},
-
-
-
-AreaSuccessResponse: {
-
-    allOf: [
-
-        {
-            $ref: "#/components/schemas/SuccessResponse"
-        },
-
-        {
-            type: "object",
-
-            properties: {
-
-                data: {
-                    $ref: "#/components/schemas/Area"
-                }
-
-            }
-
-        }
-
-    ]
-
-},
-
-AreaListResponse: {
-
-    allOf: [
-
-        {
-            $ref: "#/components/schemas/SuccessResponse"
-        },
-
-        {
-
-            type: "object",
-
-            properties: {
-
-                data: {
-
-                    type: "array",
-
-                    items: {
-
-                        $ref: "#/components/schemas/Area"
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    ]
-
-},
-
-
-                       SuccessResponse: {
-                        type: "object",
-
-                        properties: {
-
-                            success: {
-                            type: "boolean",
-                            example: true,
-                            },
-
-                            statusCode: {
-                            type: "integer",
-                            example: 200,
-                            },
-
-                            message: {
-                            type: "string",
-                            example: "Operation completed successfully.",
-                            },
-
-                            data: {
-                            nullable: true,
-                            example: null,
-                            },
-
-                        },
-
-                        },
-                     ErrorResponse: {
-
-                        type: "object",
-
-                        properties: {
-
-                            success: {
-
-                            type: "boolean",
-
-                            example: false,
-
-                            },
-
-                            statusCode: {
-
-                            type: "integer",
-
-                            example: 400,
-
-                            },
-
-                            message: {
-
-                            type: "string",
-
-                            example: "Validation failed",
-
-                            },
-
-                            errors: {
-
-                            nullable: true,
-
-                            example: [
-
-                                {
-
-                                path: "email",
-
-                                msg: "Invalid email.",
-
-                                },
-
-                            ],
-
-                            },
-
-                        },
-
-                        },
-
-
-                            },
-                            },
-                        },
-
   apis: ["./routes/*.js"],
 };
 
