@@ -1,6 +1,4 @@
 import { body } from "express-validator";
-import { PaymentMethod, DayOfWeek } from "@prisma/client";
-
 export const createCollectionRequestValidation = [
 
     body("address_id")
