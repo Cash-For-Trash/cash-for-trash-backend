@@ -55,3 +55,19 @@ export const getMyRedemptionsController = async (req, res, next) => {
       next(error);
     }
 };
+
+// get points transaction history
+export const getPointsTransactionHistoryController = async (req, res, next) => {
+    try {
+        const user_id = req.user.user_id;
+        const transactions = await RewardRedeemService.getPointsTransactionHistoryService(user_id);
+        return successResponse(
+            res,
+            "Points transaction history fetched successfully.",
+            transactions,
+            200
+        );
+    } catch (error) {
+      next(error);
+    }
+};
