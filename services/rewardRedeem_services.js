@@ -247,5 +247,26 @@ export const getMyRedemptionsService = async (userId) => {
 };
 
 
+// history of points transaction
+
+export const getPointsTransactionHistoryService = async (userId) => {
+  try {
+    const transactions = await prisma.pointsTransaction.findMany({
+      where: {
+        user_id: userId,
+      },
+      
+      orderBy: {
+        created_at: "desc",
+      },
+    });
+    return transactions;
+  } catch (error) {
+    throw new AppError("Failed to fetch points transaction history.", 500);
+  }
+};
+
+
+
 
 

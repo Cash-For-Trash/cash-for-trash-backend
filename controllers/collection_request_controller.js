@@ -39,3 +39,23 @@ export const createCollectionRequest = async (
     }
 
 };
+
+
+export const getCustomerCollectionRequest = async (
+    req,
+    res,
+    next
+)=>{
+    try{
+        const requests = await CollectionRequestServices.getCustomerCollectionRequestService(req.user.user_id);
+        successResponse(
+            res,
+            "Collection requests fetched successfully",
+            requests,
+            200
+        );
+    }
+    catch(err){
+        next(err);
+    }
+};

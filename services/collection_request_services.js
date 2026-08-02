@@ -124,3 +124,24 @@ export const createCollectionRequest = async (userId, data) => {
 
   return result;
 };
+
+
+// get customer collection request
+
+export const getCustomerCollectionRequestService = async (userId) => {
+  const collectionRequests = await prisma.collectionRequest.findMany({
+    where: {
+      user_id: userId,
+    },
+    include: {
+      address:true,
+      requestGarbages: {
+        include: {
+          garbageType: true
+        }
+      }
+    }
+  });
+  return collectionRequests;
+};
+

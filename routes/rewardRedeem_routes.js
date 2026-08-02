@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createRewardRedeemRequestController, getAllRedemptionRequestsController, getMyRedemptionsController, approveRedemptionRequestController, rejectRedemptionRequestController } from "../controllers/rewardRedeem_controller.js";
+import { createRewardRedeemRequestController, getAllRedemptionRequestsController, getPointsTransactionHistoryController, getMyRedemptionsController, approveRedemptionRequestController, rejectRedemptionRequestController } from "../controllers/rewardRedeem_controller.js";
 import { authenticate } from "../middlewares/auth_middleware.js";
 import { authorize } from "../middlewares/roles_middleware.js";
 import { ROLES } from "../utils/constants.js";
@@ -133,5 +133,24 @@ router.put("/reject/:redemption_id",
     authenticate,
     authorize(ROLES.ADMIN), 
     rejectRedemptionRequestController);
+
+/**
+ * @openapi
+ * /api/reward-redeems/points-transaction-history:
+ *   get:
+ *     tags:
+ *       - Reward Redeems
+ *     summary: Get all my points transaction history
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Points transaction history fetched successfully.
+ *       401:
+ *         description: Unauthorized.
+ */
+router.get("/my-points-transaction-history", 
+    authenticate,
+    getPointsTransactionHistoryController);
 
 export default router;
