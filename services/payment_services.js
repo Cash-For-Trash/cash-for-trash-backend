@@ -54,6 +54,7 @@ export const paymentService = async (userId, collectionRequestId) => {
     default:
       throw new AppError("Invalid payment method.", 400);
   }
+  
 };
 
 

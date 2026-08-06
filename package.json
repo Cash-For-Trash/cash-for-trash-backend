@@ -9,7 +9,7 @@
     "start": "node index.js",
     "swagger": "node swagger.js"
   },
-    "prisma": {
+  "prisma": {
     "seed": "node prisma/seed.js"
   },
   "type": "module",
@@ -31,6 +31,7 @@
     "mysql2": "^3.22.5",
     "nodemailer": "^9.0.3",
     "otp-generator": "^4.0.1",
+    "stripe": "^22.4.0",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"
   },

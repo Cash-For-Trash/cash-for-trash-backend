@@ -18,7 +18,7 @@ export const createCollectionRequestValidation = [
     body("payment_method")
         .notEmpty()
         .withMessage("Payment method is required.")
-        .isIn(["MONTHLY","CASH"])
+        .isIn(["MONTHLY","CASH","CARD","WALLET"])
         .withMessage("Invalid payment method."),
 
     body("collection_img")
