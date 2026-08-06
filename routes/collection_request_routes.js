@@ -114,7 +114,7 @@ router.post(
 );
 /**
  * @openapi
- * /api/collection-requests:
+ * /api/collection-requests/my-collection-requests:
  *   get:
  *     summary: Get collection requests for customer
  *     tags:

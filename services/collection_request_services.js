@@ -103,16 +103,15 @@ export const createCollectionRequest = async (userId, data) => {
       })),
     });
 
-    if (payment_method === "CASH") {
-      await tx.payment.create({
-        data: {
-          collection_request_id: request.collection_request_id,
-          payment_method: "CASH",
-          payment_status: "PENDING",
-          payment_amount: servicePrice,
-        },
-      });
-    }
+    await tx.payment.create({
+      data: {
+        collection_request_id: request.collection_request_id,
+        payment_method: payment_method,
+        payment_status: payment_method === "MONTHLY" ? "PAID" : "PENDING",
+        payment_amount: servicePrice,
+      },
+    });
+
 
     return request;
   });
