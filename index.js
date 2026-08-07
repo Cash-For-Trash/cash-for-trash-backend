@@ -13,11 +13,8 @@ import rewardRedeemRoutes from "./routes/rewardRedeem_routes.js";
 import collectionRequestRoutes from "./routes/collection_request_routes.js";
 import workerRoutes from "./routes/worker_routes.js";
 import pricingRoutes from "./routes/pricing_routes.js";
-<<<<<<< HEAD
 import customerRoutes from "./routes/customer_routes.js";
-=======
 import paymentRoutes from "./routes/payment_routes.js";
->>>>>>> 55872121982cea987aca7f5ebad620bb73005254
 import { errorHandler } from "./middlewares/error_middleware.js";
 import { swaggerUi, swaggerSpec } from "./swagger.js";
 
