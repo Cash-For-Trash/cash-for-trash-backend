@@ -14,6 +14,11 @@ export const getCustomers = async (query) => {
       email: true,
       is_verified: true,
       is_active: true,
+      customer: {
+        select: {
+          points: true,
+        },
+      },
     },
   });
 
@@ -25,6 +30,7 @@ export const getCustomers = async (query) => {
     email: user.email,
     is_verified: user.is_verified,
     is_active: user.is_active,
+    points: user.customer ? Number(user.customer.points) : 0,
   }));
 
   return result;

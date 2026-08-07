@@ -13,6 +13,7 @@ import rewardRedeemRoutes from "./routes/rewardRedeem_routes.js";
 import collectionRequestRoutes from "./routes/collection_request_routes.js";
 import workerRoutes from "./routes/worker_routes.js";
 import pricingRoutes from "./routes/pricing_routes.js";
+import customerRoutes from "./routes/customer_routes.js";
 import { errorHandler } from "./middlewares/error_middleware.js";
 import { swaggerUi, swaggerSpec } from "./swagger.js";
 
@@ -28,6 +29,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/customer", customerRoutes);
 app.use("/api/garbage-types", garbageTypesRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/addresses", addressRoutes);

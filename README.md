@@ -96,7 +96,10 @@ The application defines three distinct primary roles (`customer`, `worker`, `adm
 - `PUT /api/user/profile`: Update user profile details.
 - `GET /api/user/notifications`: List user notifications.
 
-### 3. Addresses Management (`/api/addresses`)
+### 3. Customer Features (`/api/customer`)
+- `GET /api/customer/points`: Get authenticated customer points balance (`Customer`).
+
+### 4. Addresses Management (`/api/addresses`)
 - `POST /api/addresses`: Add new pickup address (Customer).
 - `GET /api/addresses`: List authenticated user's saved addresses.
 - `GET /api/addresses/:id`: Get address by ID.

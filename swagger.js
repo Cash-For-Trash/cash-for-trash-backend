@@ -18,6 +18,7 @@ const options = {
     tags: [
       { name: "Authentication", description: "User registration, login, OTP verification, password reset & tokens" },
       { name: "User", description: "Profile management & user notifications" },
+      { name: "Customer", description: "Customer points & customer features" },
       { name: "Addresses", description: "Customer pickup address management" },
       { name: "Garbage Types", description: "Recyclable waste categories & pricing per kg" },
       { name: "Collection Requests", description: "Waste collection scheduling & pickup management" },
