@@ -136,7 +136,7 @@ router.put("/reject/:redemption_id",
 
 /**
  * @openapi
- * /api/reward-redeems/points-transaction-history:
+ * /api/reward-redeems/my-points-transaction-history:
  *   get:
  *     tags:
  *       - Reward Redeems
