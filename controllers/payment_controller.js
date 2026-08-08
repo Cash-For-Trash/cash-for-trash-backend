@@ -22,3 +22,15 @@ export const getPaymentHistoryController = async (req, res, next) => {
         return next(error)
     }
 }
+
+export const handleStripeWebhookController = async (req, res) => {
+    try {
+        await PaymentServices.handleStripeWebhook(req);
+
+        return res.status(200).json({
+            received: true,
+        });
+    } catch (error) {
+        return res.status(400).send(`Webhook Error: ${error.message}`);
+    }
+};
