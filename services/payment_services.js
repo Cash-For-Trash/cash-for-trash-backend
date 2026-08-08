@@ -1,6 +1,6 @@
 import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
-
+import stripe from "../utils/stripe.js"
 export const paymentService = async (userId, collectionRequestId) => {
   const payment = await prisma.payment.findFirst({
     where: {
@@ -41,15 +41,47 @@ export const paymentService = async (userId, collectionRequestId) => {
         400
       );
 
-    case "CARD":
-    case "WALLET":
-      return {
-        payment_id: payment.payment_id,
-        payment_method: payment.payment_method,
-        payment_amount: payment.payment_amount,
-        payment_status: payment.payment_status,
-        payment_url: `https://fake-payment-url.com/${payment.payment_id}`,
-      };
+case "CARD": {
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ["card"],
+
+    line_items: [
+      {
+        price_data: {
+          currency: "usd", 
+
+          product_data: {
+            name: "Collection Request Service",
+          },
+
+          unit_amount: Math.round(Number(payment.payment_amount) * 100),
+        },
+
+        quantity: 1,
+      },
+    ],
+
+    mode: "payment",
+
+    success_url: `${process.env.CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+
+    cancel_url: `${process.env.CLIENT_URL}/payment/cancel`,
+
+    metadata: {
+      payment_id: payment.payment_id,
+      collection_request_id: collectionRequestId,
+      user_id: userId,
+    },
+  });
+
+  return {
+    payment_id: payment.payment_id,
+    payment_method: payment.payment_method,
+    payment_status: payment.payment_status,
+    payment_amount: payment.payment_amount,
+    payment_url: session.url,
+  };
+}
 
     default:
       throw new AppError("Invalid payment method.", 400);
@@ -82,4 +114,36 @@ export const getPaymentHistoryService = async (userId) => {
   });
 
   return payments;
+};
+
+
+// webhook form stripe 
+export const handleStripeWebhook = async (req) => {
+  const sig = req.headers["stripe-signature"];
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    throw new AppError(`Webhook error: ${err.message}`, 400);
+  }
+
+  switch (event.type) {
+    case "checkout.session.completed": {
+      const session = event.data.object;
+      await prisma.payment.update({
+        where: { payment_id: session.metadata.payment_id },
+        data: {
+          payment_status: "PAID",
+           payment_date: new Date(),        
+        },
+      });
+      break;
+    }
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  return { received: true };
 };
