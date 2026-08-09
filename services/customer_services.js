@@ -15,3 +15,25 @@ export const getCustomerPoints = async (userId) => {
     points: Number(customer.points),
   };
 };
+
+
+export const getCustomerLeaderboard= async () => {
+  const customers = await prisma.customer.findMany({
+    orderBy: {
+      points: "desc",
+    },
+    select: {
+      points: true,
+      user: {
+        select: {
+          user_id: true,
+          first_name: true,
+          last_name: true,
+        },
+      },
+    },
+  });
+
+  return customers;
+};
+

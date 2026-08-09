@@ -15,3 +15,20 @@ export const getCustomerPoints = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCustomerLeaderBoard = async (req, res, next) => {
+  try {
+    const result = await CustomerServices.getCustomerLeaderships();
+    return successResponse(
+      res,
+      "Customers Leaderboard retrieved successfully.",
+      result,
+      200
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
