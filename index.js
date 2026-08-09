@@ -15,16 +15,18 @@ import workerRoutes from "./routes/worker_routes.js";
 import pricingRoutes from "./routes/pricing_routes.js";
 import customerRoutes from "./routes/customer_routes.js";
 import paymentRoutes from "./routes/payment_routes.js";
+import webhooksRoutes from "./routes/webhook_routes.js";
 import { errorHandler } from "./middlewares/error_middleware.js";
 import { swaggerUi, swaggerSpec } from "./swagger.js";
 
 dotenv.config();
 
 import "./config/db.js";
-
 const app = express();
 
 app.use(cors());
+
+app.use("/api/webhook", webhooksRoutes);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
