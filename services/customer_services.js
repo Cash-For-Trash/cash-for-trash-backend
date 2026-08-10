@@ -34,6 +34,12 @@ export const getCustomerLeaderboard= async () => {
     },
   });
 
-  return customers;
-};
+  return customers.map((customer, index) => ({
+    rank: index + 1,
+    customer_id: customer.user.user_id,
+    name: `${customer.user.first_name} ${customer.user.last_name}`,
+    points: Number(customer.points),
+  }));
+}
+
 

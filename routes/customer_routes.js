@@ -34,21 +34,22 @@ router.get(
   authorize(ROLES.CUSTOMER),
   getCustomerPoints
 );
-/** * @openapi
+/**
+ * @openapi
  * /api/customer/leaderboard:
  *   get:
  *     tags:
  *       - Customer
  *     summary: Get customer leaderboard
- *    security:
- *     - bearerAuth: []
- *    responses:
- *    200:
- *    description: Customers Leaderboard retrieved successfully.
- * 401:
- *   description: Unauthorized.
- * 403:
- *   description: Forbidden.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Customers Leaderboard retrieved successfully.
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden.
  */
 router.get(
   "/leaderboard",
