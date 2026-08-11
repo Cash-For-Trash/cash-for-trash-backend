@@ -14,6 +14,10 @@ const options = {
         url: "http://localhost:3000",
         description: "Local Development Server",
       },
+      {
+        url: "https://cash-for-trash.vercel.app",
+        description: "Production Server"
+      },
     ],
     tags: [
       { name: "Authentication", description: "User registration, login, OTP verification, password reset & tokens" },
