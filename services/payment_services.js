@@ -1,14 +1,22 @@
 import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
-import stripe from "../utils/stripe.js"
-export const paymentService = async (userId, collectionRequestId) => {
+import {
+  createPaymentIntention,
+  verifyPaymobHmac,
+} from "../utils/paymob.js";
+export const paymentService = async (
+  userId,
+  collectionRequestId
+) => {
   const payment = await prisma.payment.findFirst({
     where: {
       collection_request_id: collectionRequestId,
+
       collectionRequest: {
         user_id: userId,
       },
     },
+
     include: {
       collectionRequest: {
         select: {
@@ -21,11 +29,17 @@ export const paymentService = async (userId, collectionRequestId) => {
   });
 
   if (!payment) {
-    throw new AppError("Payment not found.", 404);
+    throw new AppError(
+      "Payment not found.",
+      404
+    );
   }
 
   if (payment.payment_status === "PAID") {
-    throw new AppError("Payment already completed.", 400);
+    throw new AppError(
+      "Payment already completed.",
+      400
+    );
   }
 
   switch (payment.payment_method) {
@@ -41,52 +55,94 @@ export const paymentService = async (userId, collectionRequestId) => {
         400
       );
 
-case "CARD": {
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-
-    line_items: [
-      {
-        price_data: {
-          currency: "usd", 
-
-          product_data: {
-            name: "Collection Request Service",
+    case "CARD": {
+      const user =
+        await prisma.user.findUnique({
+          where: {
+            user_id: userId,
           },
+        });
 
-          unit_amount: Math.round(Number(payment.payment_amount) * 100),
-        },
+      if (!user) {
+        throw new AppError(
+          "User not found.",
+          404
+        );
+      }
 
-        quantity: 1,
-      },
-    ],
+      const amountCents = Math.round(
+        Number(payment.payment_amount) * 100
+      );
 
-    mode: "payment",
+      if (!Number.isFinite(amountCents) || amountCents < 1) {
+        throw new AppError(
+          "Invalid payment amount. Amount must be at least 0.01.",
+          400
+        );
+      }
 
-    success_url: `http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      const billingData = {
+        apartment: "NA",
 
-    cancel_url: `http://localhost:3000/payment/cancel`,
+        email:
+          user.email || "NA",
 
-    metadata: {
-      payment_id: payment.payment_id,
-      collection_request_id: collectionRequestId,
-      user_id: userId,
-    },
-  });
+        floor: "NA",
 
-  return {
-    payment_id: payment.payment_id,
-    payment_method: payment.payment_method,
-    payment_status: payment.payment_status,
-    payment_amount: payment.payment_amount,
-    payment_url: session.url,
-  };
-}
+        first_name:
+          user.first_name || "Customer",
+
+        last_name:
+          user.last_name || "User",
+
+        street: "NA",
+
+        building: "NA",
+
+        phone_number:
+          user.mobile || "+201000000000",
+
+        shipping_method: "NA",
+
+        postal_code: "NA",
+
+        city: "Cairo",
+
+        country: "EG",
+
+        state: "Cairo",
+      };
+
+      const intention =
+        await createPaymentIntention(
+          amountCents,
+          payment.payment_id,
+          billingData
+        );
+
+return {
+  payment_id: payment.payment_id,
+  payment_method: payment.payment_method,
+  payment_status: payment.payment_status,
+  payment_amount: payment.payment_amount,
+
+  paymob_intention_id: intention.id,
+
+  client_secret: intention.client_secret,
+
+  checkout_url:
+    `https://accept.paymob.com/unifiedcheckout/` +
+    `?publicKey=${process.env.PAYMOB_PUBLIC_KEY}` +
+    `&clientSecret=${intention.client_secret}`,
+};
+    }
 
     default:
-      throw new AppError("Invalid payment method.", 400);
+      throw new AppError(
+        "Invalid payment method.",
+        400
+      );
   }
-  
 };
 
 
@@ -117,33 +173,79 @@ export const getPaymentHistoryService = async (userId) => {
 };
 
 
-// webhook form stripe 
-export const handleStripeWebhook = async (req) => {
-  const sig = req.headers["stripe-signature"];
+// webhook 
+export const handlePaymobWebhook = async (req) => {
+  const hmacSecret =
+    process.env.PAYMOB_HMAC_SECRET;
+  
+  const { obj } = req.body;
 
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    throw new AppError(`Webhook error: ${err.message}`, 400);
+  if (!obj) {
+    throw new AppError(
+      "Invalid webhook payload: obj is missing",
+      400
+    );
   }
 
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const session = event.data.object;
-      await prisma.payment.update({
-        where: { payment_id: session.metadata.payment_id },
-        data: {
-          payment_status: "PAID",
-           payment_date: new Date(),        
-        },
-      });
-      break;
-    }
-    default:
-      console.log(`Unhandled event type ${event.type}`);
+  const isValid =
+    verifyPaymobHmac(
+      req.query,
+      obj,
+      hmacSecret
+    );
+
+  if (!isValid) {
+    throw new AppError(
+      "HMAC verification failed.",
+      401
+    );
   }
 
-  return { received: true };
+ const paymentId =
+  obj.payment_key_claims?.extra?.payment_id ||
+  obj.order?.merchant_order_id ||
+  obj.merchant_order_id ||
+  obj.extras?.payment_id;
+
+  if (!paymentId) {
+    console.error(
+      "Payment ID not found in Paymob webhook"
+    );
+
+    return {
+      received: true,
+    };
+  }
+
+  const payment =
+    await prisma.payment.findUnique({
+      where: {
+        payment_id: String(paymentId),
+      },
+    });
+
+  if (!payment) {
+    throw new AppError(
+      `Payment ${paymentId} not found.`,
+      404
+    );
+  }
+
+  if (obj.success === true) {
+    await prisma.payment.update({
+      where: {
+        payment_id:
+          payment.payment_id,
+      },
+
+      data: {
+        payment_status: "PAID",
+        payment_date: new Date(),
+      },
+    });
+
+  return {
+    received: true,
+  };
 };
+}

@@ -23,9 +23,9 @@ export const getPaymentHistoryController = async (req, res, next) => {
     }
 }
 
-export const handleStripeWebhookController = async (req, res) => {
+export const handlePaymobWebhookController = async (req, res) => {
     try {
-        await PaymentServices.handleStripeWebhook(req);
+        await PaymentServices.handlePaymobWebhook(req);
 
         return res.status(200).json({
             received: true,
