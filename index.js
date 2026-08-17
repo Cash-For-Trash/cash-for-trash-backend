@@ -26,7 +26,7 @@ const app = express();
 
 app.use(cors());
 
-app.use("/api/webhook", webhooksRoutes);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -44,6 +44,7 @@ app.use("/api/collection-requests", collectionRequestRoutes);
 app.use("/api/workers", workerRoutes);
 app.use("/api/pricing", pricingRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/webhook", webhooksRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/api-docs.json", (req, res) => {
