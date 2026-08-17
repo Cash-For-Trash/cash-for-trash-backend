@@ -67,6 +67,27 @@ enum DayOfWeek {
   FRIDAY
 }
 
+enum NotificationType {
+  REQUEST_CREATED
+  REQUEST_NEEDS_RESCHEDULE
+  REQUEST_ACCEPTED
+  REQUEST_ON_THE_WAY
+  REQUEST_COLLECTED
+  REQUEST_CANCELLED
+
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+
+  POINTS_EARNED
+
+  REWARD_REQUESTED
+  REWARD_APPROVED
+  REWARD_REJECTED
+  REWARD_DELIVERED
+
+  SYSTEM
+}
+
 model PointsTransaction {
   point_id String @id @default(cuid())
 
@@ -261,7 +282,8 @@ model Notification {
 
   user_id String
   user    User   @relation(fields: [user_id], references: [user_id])
-
+  type    NotificationType
+  related_id String?
   message String @db.VarChar(500)
   title   String @db.VarChar(100)
 
@@ -272,6 +294,21 @@ model Notification {
 
   @@index([user_id, is_read])
   @@index([created_at])
+}
+
+model UserDevice {
+  device_id   String @id @default(cuid())
+
+  user_id     String
+  user        User @relation(fields: [user_id], references: [user_id])
+
+  fcm_token   String
+  device_type String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
 }
 
 model User {
@@ -309,6 +346,7 @@ model User {
   addresses Address[]
 
   notifications     Notification[]
+   devices       UserDevice[]
   pointTransactions PointsTransaction[]
 
   collectionRequests CollectionRequest[]

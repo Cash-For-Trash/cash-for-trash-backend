@@ -11,9 +11,6 @@
     "start": "node index.js",
     "swagger": "node swagger.js"
   },
-  "prisma": {
-    "seed": "node prisma/seed.js"
-  },
   "type": "module",
   "keywords": [],
   "author": "",
