@@ -1,13 +1,13 @@
-import successResponse from '../utils/response.js';
+import { successResponse } from '../utils/response.js';
 import * as notificationService from '../services/notification_services.js';
 
 
 // get all notifications for a user
-export const getNotifications = async (req, res, next) => {
+export const getNotificationsController = async (req, res, next) => {
     try {
         const userId = req.user.user_id;
         const notifications = await notificationService.getNotificationsService(userId);
-        return successResponse(res, 200, "Notifications fetched successfully.", notifications);
+        return successResponse(res, "Notifications fetched successfully.", notifications, 200);
     } catch (error) {
         next(error);
     }
@@ -15,11 +15,11 @@ export const getNotifications = async (req, res, next) => {
 
 
 // get unread notifications count for a user
-export const getUnreadNotificationsCount = async (req, res, next) => {
+export const getUnreadNotificationsCountController = async (req, res, next) => {
     try {
         const userId = req.user.user_id;
         const count = await notificationService.getUnreadNotificationsCountService(userId);
-        return successResponse(res, 200, "Unread notifications count fetched successfully.", { count });
+        return successResponse(res, "Unread notifications count fetched successfully.", { count }, 200);
     } catch (error) {
         next(error);
     }
@@ -27,12 +27,12 @@ export const getUnreadNotificationsCount = async (req, res, next) => {
 
 
 // mark a notification as read
-export const markNotificationAsRead = async (req, res, next) => {
+export const readNotificationController = async (req, res, next) => {
     try {
         const userId = req.user.user_id;
-        const notificationId = req.params.notificationId;
+        const notificationId = req.params.notification_id;
         const notification = await notificationService.markNotificationAsReadService(userId, notificationId);
-        return successResponse(res, 200, "Notification marked as read successfully.", notification);
+        return successResponse(res, "Notification marked as read successfully.", notification, 200);
     }
     catch (error) {
         next(error);
