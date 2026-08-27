@@ -130,12 +130,7 @@ export const getWorkerCollectionRequestDetailsService = async (
   return collectionRequest;
 };
 
-// update collection request
-export const updateCollectionRequestService = async (
-  workerId,
-  requestId,
-  garbages
-) => {
+export const checkWorker= async (workerId) => {
   // Check worker
   const worker = await prisma.worker.findUnique({
     where: {
@@ -147,100 +142,139 @@ export const updateCollectionRequestService = async (
     throw new AppError("Worker not found.", 404);
   }
 
-  // Check collection request
-  const collectionRequest = await prisma.collectionRequest.findUnique({
+  return worker;
+}
+
+const getAssignedCollectionRequest = async (workerId, requestId) => {
+  const request = await prisma.collectionRequest.findFirst({
     where: {
       collection_request_id: requestId,
+
+      availability: {
+        workerAvailabilities: {
+          some: {
+            user_id: workerId,
+          },
+        },
+      },
+    },
+
+    select: {
+      collection_request_id: true,
+      user_id: true,
+      status: true,
+
+      requestGarbages: {
+        select: {
+          request_garbage_id: true,
+
+          garbageType: {
+            select: {
+              price_per_kg: true,
+            },
+          },
+        },
+      },
     },
   });
 
-  if (!collectionRequest) {
-    throw new AppError("Collection request not found.", 404);
+  if (!request) {
+    throw new AppError(
+      "Collection request not found or not assigned to this worker.",
+      404
+    );
   }
 
-  if (collectionRequest.status === "COLLECTED") {
+  if (request.status === "COLLECTED") {
     throw new AppError(
       "Collection request has already been collected.",
       400
     );
   }
 
-  if (collectionRequest.status === "CANCELLED") {
+  if (request.status === "CANCELLED") {
     throw new AppError(
       "Collection request has been cancelled.",
       400
     );
   }
 
+  return request;
+};
+
+
+const prepareGarbageUpdates = (requestGarbages, garbages) => {
   const garbageMap = new Map(
-    garbages.map((g) => [g.request_garbage_id, g])
+    garbages.map((garbage) => [
+      garbage.request_garbage_id,
+      garbage,
+    ])
   );
 
-  const result = await prisma.$transaction(
-    async (tx) => {
-      const request = await tx.collectionRequest.findFirst({
-        where: {
-          collection_request_id: requestId,
-          availability: {
-            workerAvailabilities: {
-              some: {
-                user_id: workerId,
-              },
-            },
-          },
-        },
-        include: {
-          requestGarbages: {
-            include: {
-              garbageType: true,
-            },
-          },
-        },
-      });
+  let totalPoints = 0;
 
-      if (!request) {
-        throw new AppError(
-          "Collection request not found or not assigned to this worker.",
-          404
-        );
-      }
+  const updates = requestGarbages.map((item) => {
+    const garbage = garbageMap.get(item.request_garbage_id);
 
-      let totalPoints = 0;
-
-      await Promise.all(
-        request.requestGarbages.map(async (item) => {
-          const garbage = garbageMap.get(item.request_garbage_id);
-
-          if (!garbage) {
-            throw new AppError(
-              `Weight is missing for garbage ${item.request_garbage_id}`,
-              400
-            );
-          }
-
-          const weight = Number(garbage.actual_weight);
-
-          const earnedPoints = Math.floor(
-            Number(item.garbageType.price_per_kg) * weight
-          );
-
-          totalPoints += earnedPoints;
-
-          await tx.requestGarbage.update({
-            where: {
-              request_garbage_id: item.request_garbage_id,
-            },
-            data: {
-              actual_weight: weight,
-              earned_points: earnedPoints,
-            },
-          });
-        })
+    if (!garbage) {
+      throw new AppError(
+        `Weight is missing for garbage ${item.request_garbage_id}`,
+        400
       );
+    }
+
+    const weight = Number(garbage.actual_weight);
+
+    if (!Number.isFinite(weight) || weight < 0) {
+      throw new AppError(
+        `Invalid weight for garbage ${item.request_garbage_id}`,
+        400
+      );
+    }
+
+    const pricePerKg = Number(item.garbageType.price_per_kg);
+
+    const earnedPoints = Math.floor(pricePerKg * weight);
+
+    totalPoints += earnedPoints;
+
+    return {
+      request_garbage_id: item.request_garbage_id,
+      actual_weight: weight,
+      earned_points: earnedPoints,
+    };
+  });
+
+  return {
+    updates,
+    totalPoints,
+  };
+};
+
+
+const completeCollectionRequest = async ({
+  requestId,
+  userId,
+  garbageUpdates,
+  totalPoints,
+}) => {
+  return prisma.$transaction(
+    async (tx) => {
+      for (const garbage of garbageUpdates) {
+        await tx.requestGarbage.update({
+          where: {
+            request_garbage_id: garbage.request_garbage_id,
+          },
+          data: {
+            actual_weight: garbage.actual_weight,
+            earned_points: garbage.earned_points,
+          },
+        });
+      }
 
       await tx.customer.update({
         where: {
-          user_id: request.user_id,
+          user_id: userId,
         },
         data: {
           points: {
@@ -251,7 +285,7 @@ export const updateCollectionRequestService = async (
 
       await tx.pointsTransaction.create({
         data: {
-          user_id: request.user_id,
+          user_id: userId,
           points: totalPoints,
           reason: "Collection request completed",
         },
@@ -274,6 +308,31 @@ export const updateCollectionRequestService = async (
       timeout: 10000,
     }
   );
+};
+
+export const updateCollectionRequestService = async (
+  workerId,
+  requestId,
+  garbages
+) => {
+  await checkWorker(workerId);
+
+  const request = await getAssignedCollectionRequest(
+    workerId,
+    requestId
+  );
+
+  const { updates, totalPoints } = prepareGarbageUpdates(
+    request.requestGarbages,
+    garbages
+  );
+
+  const result = await completeCollectionRequest({
+    requestId,
+    userId: request.user_id,
+    garbageUpdates: updates,
+    totalPoints,
+  });
 
   return {
     message: "Collection request updated successfully.",

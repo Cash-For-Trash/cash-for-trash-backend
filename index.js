@@ -1,7 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-// import compression from "compression";
+import compression from "compression";
+import helmet from "helmet";
+import { generalLimiter } from "./middlewares/rate_limit_middleware.js";
 import authRoutes from "./routes/auth_routes.js";
 import userRoutes from "./routes/user_routes.js";
 import areaRoutes from "./routes/area_routes.js";
@@ -26,8 +28,14 @@ dotenv.config();
 
 import "./config/db.js";
 const app = express();
-// app.use(compression());
+
+
+app.set("trust proxy", 1);
+app.use(compression());
+app.use(helmet());
 app.use(cors());
+
+app.use(generalLimiter);
 
 
 app.use(express.json());

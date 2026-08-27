@@ -2,6 +2,7 @@ import { Router } from "express";
 import {register,verifyOTP,resendOTP,login,refreshToken,logout,forgotPassword,verifyResetPasswordOTP,resetPassword,checkToken} from "../controllers/auth_controller.js";
 import {register_validation,verifyOTPValidation,resendOTPValidation,login_validation,refresh_token_validation,forgotPasswordValidation,verifyResetPasswordOTPValidation,resetPasswordValidation} from "../validations/auth_validation.js";
 import { validate, authenticate } from "../middlewares/auth_middleware.js";
+import { forgotPasswordLimiter,verificationLimiter,loginLimiter,passwordResetLimiter,resendOTPLimiter } from "../middlewares/rate_limit_middleware.js";
 
 const router = Router();
 
@@ -70,7 +71,7 @@ router.post("/register", register_validation , validate , register);
  *       404:
  *         description: User not found.
  */
-router.post("/verify-otp",verifyOTPValidation,validate,verifyOTP);
+router.post("/verify-otp",verifyOTPValidation,verificationLimiter,validate,verifyOTP);
 /**
  * @openapi
  * /api/auth/resend-otp:
@@ -97,7 +98,7 @@ router.post("/verify-otp",verifyOTPValidation,validate,verifyOTP);
  *       404:
  *         description: User not found.
  */
-router.post("/resend-otp",resendOTPValidation,validate,resendOTP);
+router.post("/resend-otp",resendOTPValidation,resendOTPLimiter,validate,resendOTP);
 /**
  * @openapi
  * /api/auth/login:
@@ -124,7 +125,7 @@ router.post("/resend-otp",resendOTPValidation,validate,resendOTP);
  *       403:
  *         description: Email is not verified.
  */
-router.post("/login",login_validation,validate,login);
+router.post("/login",login_validation,loginLimiter,validate,login);
 /**
  * @openapi
  * /api/auth/refresh-token:
@@ -183,7 +184,7 @@ router.post("/logout",authenticate,logout);
  *       404:
  *         description: User not found.
  */
-router.post("/forgot-password",forgotPasswordValidation,validate,forgotPassword);
+router.post("/forgot-password",forgotPasswordValidation,forgotPasswordLimiter,validate,forgotPassword);
 /**
  * @openapi
  * /api/auth/verify-reset-password-otp:
@@ -206,7 +207,7 @@ router.post("/forgot-password",forgotPasswordValidation,validate,forgotPassword)
  *       404:
  *         description: User not found.
  */
-router.post("/verify-reset-password-otp",verifyResetPasswordOTPValidation,validate,verifyResetPasswordOTP);
+router.post("/verify-reset-password-otp",verifyResetPasswordOTPValidation,verificationLimiter,validate,verifyResetPasswordOTP);
 /**
  * @openapi
  * /api/auth/reset-password:
@@ -229,7 +230,7 @@ router.post("/verify-reset-password-otp",verifyResetPasswordOTPValidation,valida
  *       404:
  *         description: User not found.
  */
-router.post("/reset-password",resetPasswordValidation,validate,resetPassword);
+router.post("/reset-password",resetPasswordValidation,passwordResetLimiter,validate,resetPassword);
 /**
  * @openapi
  * /api/auth/check-token:
