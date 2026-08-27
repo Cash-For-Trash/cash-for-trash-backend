@@ -1,6 +1,6 @@
-import prisma from "../prisma/client";
-import AppError from "../utils/appError";
-
+import prisma from "../config/db.js";
+import AppError from "../utils/app_error.js";
+import sendPushNotification from "../utils/pushNotification.js";
 // create a notification for a user
 export const notificationService = async ({
   userId,
@@ -10,6 +10,7 @@ export const notificationService = async ({
     relatedId=null
 }
 ) => {
+    // 
     const notification = await prisma.notification.create({
         data: {
             user_id: userId,
@@ -19,6 +20,24 @@ export const notificationService = async ({
             related_id: relatedId,
         },
     });
+
+    //get user's fcm token
+    const userDevices = await prisma.userDevice.findMany({
+        where: {
+            user_id: userId,
+        },
+    });
+
+    for (const device of userDevices) {
+        if (device.fcm_token) {
+            try {
+                await sendPushNotification(device.fcm_token, title, message);
+            } catch (error) {
+                console.error("Error sending push notification:", error);
+            }
+        }
+    }
+
     return notification;
 }
 

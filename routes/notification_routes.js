@@ -1,10 +1,10 @@
 import { Router } from "express"
-import { authenticate } from "../middlewares/auth_middleware"
+import { authenticate } from "../middlewares/auth_middleware.js"
 import {
     getNotificationsController,
     readNotificationController,
     getUnreadNotificationsCountController
-} from "../controllers/notification_controller"
+} from "../controllers/notification_controller.js"
 
 const router=Router()
 
@@ -68,3 +68,5 @@ router.patch("/:notification_id/read", authenticate, readNotificationController)
  */
 
 router.get("/my-notifications-count", authenticate, getUnreadNotificationsCountController);
+
+export default router
