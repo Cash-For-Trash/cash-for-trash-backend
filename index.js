@@ -49,7 +49,7 @@ app.use("/api/pricing", pricingRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/webhook", webhooksRoutes);
 app.use("/api/userdevice", userDeviceRoutes);
-app.use("/api/notifications", notificationRoutes);
+app.use("/api/notification", notificationRoutes);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

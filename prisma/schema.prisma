@@ -282,7 +282,7 @@ model Notification {
 
   user_id String
   user    User   @relation(fields: [user_id], references: [user_id])
-  type    NotificationType
+  type    NotificationType @default(SYSTEM)
   related_id String?
   message String @db.VarChar(500)
   title   String @db.VarChar(100)

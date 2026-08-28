@@ -231,15 +231,27 @@ const options = {
         },
         SuccessResponse: {
           type: "object",
+          example: {
+            success: true,
+            statusCode: 200,
+            message: "Operation completed successfully.",
+            data: {},
+          },
           properties: {
             success: { type: "boolean", example: true },
             statusCode: { type: "integer", example: 200 },
             message: { type: "string", example: "Operation completed successfully." },
-            data: { nullable: true, example: null },
+            data: { type: "object", nullable: true, example: {} },
           },
         },
         ErrorResponse: {
           type: "object",
+          example: {
+            success: false,
+            statusCode: 400,
+            message: "Validation failed",
+            errors: [{ path: "email", msg: "Invalid email." }],
+          },
           properties: {
             success: { type: "boolean", example: false },
             statusCode: { type: "integer", example: 400 },
@@ -250,6 +262,28 @@ const options = {
             },
           },
         },
+        DefaultRequest: {
+          type: "object",
+          description: "JSON request payload for endpoints without a dedicated request schema.",
+          additionalProperties: true,
+          example: {},
+        },
+        DefaultResponse: {
+          type: "object",
+          description: "Standard JSON response for endpoints without a dedicated response schema.",
+          example: {
+            success: true,
+            statusCode: 200,
+            message: "Operation completed successfully.",
+            data: {},
+          },
+          properties: {
+            success: { type: "boolean", example: true },
+            statusCode: { type: "integer", example: 200 },
+            message: { type: "string", example: "Operation completed successfully." },
+            data: { type: "object", nullable: true, example: {} },
+          },
+        },
       },
     },
   },
@@ -257,5 +291,47 @@ const options = {
 };
 
 const swaggerSpec = swaggerJsdoc(options);
+
+const bodyMethods = new Set(["post", "put", "patch"]);
+
+for (const pathItem of Object.values(swaggerSpec.paths ?? {})) {
+  for (const [method, operation] of Object.entries(pathItem)) {
+    if (!bodyMethods.has(method) || !operation || typeof operation !== "object") {
+      continue;
+    }
+
+    operation.requestBody ??= {
+      required: false,
+      content: {
+        "application/json": {
+          schema: { $ref: "#/components/schemas/DefaultRequest" },
+        },
+      },
+    };
+    operation.requestBody.content ??= {};
+    operation.requestBody.content["application/json"] ??= {
+      schema: { $ref: "#/components/schemas/DefaultRequest" },
+    };
+  }
+
+  for (const response of Object.values(pathItem)) {
+    if (!response || typeof response !== "object" || !response.responses) {
+      continue;
+    }
+
+    for (const [status, responseDefinition] of Object.entries(response.responses)) {
+      const statusCode = Number.parseInt(status, 10);
+      const schema = statusCode >= 400
+        ? { $ref: "#/components/schemas/ErrorResponse" }
+        : { $ref: "#/components/schemas/DefaultResponse" };
+
+      responseDefinition.content ??= {
+        "application/json": {
+          schema,
+        },
+      };
+    }
+  }
+}
 
 export { swaggerUi, swaggerSpec };

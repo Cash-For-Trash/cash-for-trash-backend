@@ -50,7 +50,18 @@
           }
         }
       }
-    }
+    },
+   "/api/auth/login":{
+          "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+   }
+
   
   }
   
