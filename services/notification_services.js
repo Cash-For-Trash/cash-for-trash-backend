@@ -1,13 +1,14 @@
+import { log } from "console";
 import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
 import sendPushNotification from "../utils/pushNotification.js";
 // create a notification for a user
 export const notificationService = async ({
-  userId,
-  title,
-  message,
+    userId,
+    title,
+    message,
     type,
-    relatedId=null
+    relatedId = null
 }
 ) => {
     // 
@@ -30,10 +31,23 @@ export const notificationService = async ({
 
     for (const device of userDevices) {
         if (device.fcm_token) {
+            console.log("FCM Token: ", device.fcm_token);
+            console.log("user ID: ", userId);
+
             try {
                 await sendPushNotification(device.fcm_token, title, message);
             } catch (error) {
-                console.error("Error sending push notification:", error);
+                console.error("Error sending push notification:", error?.message || error);
+                const errorCode = error?.code || error?.errorInfo?.code;
+                if (
+                    errorCode === "messaging/registration-token-not-registered" ||
+                    errorCode === "messaging/invalid-registration-token"
+                ) {
+                    console.log(`Cleaning up expired/invalid FCM token for device ${device.device_id}`);
+                    await prisma.userDevice.delete({
+                        where: { device_id: device.device_id },
+                    }).catch(() => { });
+                }
             }
         }
     }
@@ -44,12 +58,12 @@ export const notificationService = async ({
 // get all notifications for a user
 export const getNotificationsService = async (userId) => {
     const user = await prisma.user.findUnique({
-        where:{
+        where: {
             user_id: userId,
         },
     });
-        
-if (!user) {
+
+    if (!user) {
         throw new AppError(
             "User not found.",
             404
@@ -88,6 +102,20 @@ export const getUnreadNotificationsCountService = async (userId) => {
         },
     });
     return unreadCount;
+}
+
+// send notification
+export const sendNotificationService = async (param1, title, message, type, relatedId = null) => {
+    if (typeof param1 === "object" && param1 !== null) {
+        return await notificationService(param1);
+    }
+    return await notificationService({
+        userId: param1,
+        title,
+        message,
+        type,
+        relatedId,
+    });
 }
 
 

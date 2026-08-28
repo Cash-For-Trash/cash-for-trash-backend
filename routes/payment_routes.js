@@ -5,6 +5,23 @@ import { authenticate } from "../middlewares/auth_middleware.js"
 const router = Router();
 
 
+// get payment history
+/**
+ * @openapi
+ * /api/payment/my-payments:
+ *   get:
+ *     summary: Get my payment history
+ *     tags:
+ *       - Payment
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Payment history fetched successfully
+ */
+router.get("/my-payments", authenticate, getPaymentHistoryController);
+
+
 // create payment
 /**
  * @openapi
@@ -36,23 +53,6 @@ const router = Router();
  *       201:
  *         description: Payment created successfully
  */
-router.post("/:collection_request_id", authenticate,createPaymentController);
-
-
-// get payment history
-/**
- * @openapi
- * /api/payment/my-payments:
- *   get:
- *     summary: Get my payment history
- *     tags:
- *       - Payment
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Payment history fetched successfully
- */
-router.get("/my-payments", authenticate, getPaymentHistoryController);
+router.post("/:collection_request_id", authenticate, createPaymentController);
 
 export default router;
