@@ -17,28 +17,41 @@ if(existingArea){
 
 }
 
-if(data.north_lat <= data.south_lat){
+let north_lat = Number(data.north_lat);
+let south_lat = Number(data.south_lat);
+let east_lng = Number(data.east_lng);
+let west_lng = Number(data.west_lng);
 
+if (north_lat === south_lat) {
     throw new AppError(
         "Invalid latitude boundaries.",
         400
     );
-
 }
 
-if(data.east_lng <= data.west_lng){
-
+if (east_lng === west_lng) {
     throw new AppError(
         "Invalid longitude boundaries.",
         400
     );
+}
 
+if (north_lat < south_lat) {
+    [north_lat, south_lat] = [south_lat, north_lat];
+}
+
+if (east_lng < west_lng) {
+    [east_lng, west_lng] = [west_lng, east_lng];
 }
 
 const area = await prisma.area.create({
-
-    data
-
+    data: {
+        ...data,
+        north_lat,
+        south_lat,
+        east_lng,
+        west_lng,
+    }
 });
 
 return area;
@@ -97,7 +110,7 @@ export const updateArea = async (
     data
 ) => {
 
-    await getAreaById(area_id);
+    const existingArea = await getAreaById(area_id);
 
     const updatedData = Object.fromEntries(
         Object.entries(data).filter(
@@ -111,9 +124,41 @@ export const updateArea = async (
             400
         );
     }
-if (updatedData.name) {
 
-    const existingArea = await prisma.area.findFirst({
+    if (
+        updatedData.north_lat !== undefined ||
+        updatedData.south_lat !== undefined ||
+        updatedData.east_lng !== undefined ||
+        updatedData.west_lng !== undefined
+    ) {
+        let north_lat = Number(updatedData.north_lat ?? existingArea.north_lat);
+        let south_lat = Number(updatedData.south_lat ?? existingArea.south_lat);
+        let east_lng = Number(updatedData.east_lng ?? existingArea.east_lng);
+        let west_lng = Number(updatedData.west_lng ?? existingArea.west_lng);
+
+        if (north_lat === south_lat) {
+            throw new AppError("Invalid latitude boundaries.", 400);
+        }
+        if (east_lng === west_lng) {
+            throw new AppError("Invalid longitude boundaries.", 400);
+        }
+
+        if (north_lat < south_lat) {
+            [north_lat, south_lat] = [south_lat, north_lat];
+        }
+        if (east_lng < west_lng) {
+            [east_lng, west_lng] = [west_lng, east_lng];
+        }
+
+        updatedData.north_lat = north_lat;
+        updatedData.south_lat = south_lat;
+        updatedData.east_lng = east_lng;
+        updatedData.west_lng = west_lng;
+    }
+
+    if (updatedData.name) {
+
+    const duplicateName = await prisma.area.findFirst({
 
         where: {
             name: updatedData.name,
@@ -124,7 +169,7 @@ if (updatedData.name) {
 
     });
 
-    if (existingArea) {
+    if (duplicateName) {
         throw new AppError(
             "Area name already exists.",
             409

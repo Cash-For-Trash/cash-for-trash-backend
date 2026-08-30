@@ -3,9 +3,9 @@ import AppError from "../utils/app_error.js";
 import { ROLES } from "../utils/constants.js";
 import { formatTime } from "../utils/time.js";
 
-const findAreaByCoordinates = async (latitude, longitude) => {
+const findAreasByCoordinates = async (latitude, longitude) => {
 
-    const area = await prisma.area.findFirst({
+    const areas = await prisma.area.findMany({
 
         where:{
 
@@ -31,7 +31,7 @@ const findAreaByCoordinates = async (latitude, longitude) => {
 
     });
 
-    return area;
+    return areas;
 
 };
 
@@ -122,13 +122,13 @@ export const createAddress = async (userId, addressData) => {
 
     // Check service area
 
-    const area =
-    await findAreaByCoordinates(
+    const areas =
+    await findAreasByCoordinates(
         latitude,
         longitude
     );
 
-    if(!area){
+    if(!areas || areas.length === 0){
 
         throw new AppError(
             "Service is not available in this location.",
@@ -208,13 +208,13 @@ export const updateAddress = async (
         const longitude =
             updateData.longitude ?? address.longitude;
 
-        const area =
-        await findAreaByCoordinates(
+        const areas =
+        await findAreasByCoordinates(
             latitude,
             longitude
         );
 
-        if(!area){
+        if(!areas || areas.length === 0){
 
             throw new AppError(
                 "Service is not available in this location.",
@@ -393,14 +393,14 @@ export const getAvailableSlots = async (
 
     }
 
-    const area = await findAreaByCoordinates(
+    const areas = await findAreasByCoordinates(
 
         address.latitude,
         address.longitude
 
     );
 
-    if(!area){
+    if(!areas || areas.length === 0){
 
         throw new AppError(
             "Service is unavailable in your area.",
@@ -409,11 +409,13 @@ export const getAvailableSlots = async (
 
     }
 
+    const areaIds = areas.map((area) => area.area_id);
+
     const slots = await prisma.availability.findMany({
 
         where:{
 
-            area_id:area.area_id,
+            area_id: { in: areaIds },
 
             workerAvailabilities:{
 

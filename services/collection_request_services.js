@@ -24,29 +24,31 @@ export const createCollectionRequest = async (userId, data) => {
     throw new AppError("Address not found.", 404);
   }
 
-  const area = await prisma.area.findFirst({
-    where: {
-      is_active: true,
-      north_lat: { gte: address.latitude },
-      south_lat: { lte: address.latitude },
-      east_lng: { gte: address.longitude },
-      west_lng: { lte: address.longitude },
-    },
-  });
-
-  if (!area) {
-    throw new AppError("Service is unavailable in your area.", 400);
-  }
-
   const availability = await prisma.availability.findFirst({
     where: {
       availability_id,
-      area_id: area.area_id,
+    },
+    include: {
+      area: true,
     },
   });
 
-  if (!availability) {
+  if (!availability || !availability.area || !availability.area.is_active) {
     throw new AppError("Availability slot not found.", 404);
+  }
+
+  const area = availability.area;
+
+  const addressLat = Number(address.latitude);
+  const addressLng = Number(address.longitude);
+  const isCovered =
+    addressLat <= Number(area.north_lat) &&
+    addressLat >= Number(area.south_lat) &&
+    addressLng <= Number(area.east_lng) &&
+    addressLng >= Number(area.west_lng);
+
+  if (!isCovered) {
+    throw new AppError("Service is unavailable in your area.", 400);
   }
 
   if (payment_method === "MONTHLY") {

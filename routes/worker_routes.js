@@ -101,6 +101,29 @@ router.get(
  *         schema:
  *           type: string
  *         example: cmrkvmwr20000utr4aoa4fjeh
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - garbages
+ *             properties:
+ *               garbages:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - request_garbage_id
+ *                     - actual_weight
+ *                   properties:
+ *                     request_garbage_id:
+ *                       type: string
+ *                       example: cmrkvmwr20000utr4aoa4fjeh
+ *                     actual_weight:
+ *                       type: number
+ *                       example: 10
  *     responses:
  *       200:
  *         description: Worker collection requests details by request id.
