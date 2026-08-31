@@ -433,6 +433,10 @@ export const getAvailableSlots = async (
 
         },
 
+        include:{
+            area:true
+        },
+
         orderBy:[
 
             {
@@ -455,7 +459,9 @@ export const getAvailableSlots = async (
 
         from:formatTime(slot.from_time),
 
-        to:formatTime(slot.to_time)
+        to:formatTime(slot.to_time),
+
+        service_price: Number(slot.area?.service_price || 0)
 
     }));
 
