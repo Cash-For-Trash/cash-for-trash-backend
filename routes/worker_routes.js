@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { approveWorker, getWorkerCollectionRequest,getWorkerCollectionRequestDetails,updateCollectionRequest} from "../controllers/worker_controller.js";
+import { approveWorker, getWorkerCollectionRequest,getWorkerCollectionRequestDetails,getCollectionRequestByStatus,updateCollectionRequest } from "../controllers/worker_controller.js";
 import { ROLES } from "../utils/constants.js";
 import { authenticate, validate } from "../middlewares/auth_middleware.js";
 import { authorize } from "../middlewares/roles_middleware.js";
-import { approveWorkerValidation } from "../validations/worker_validation.js";
+import { addActualWeightValidation , getCollectionRequestByStatusValidation ,approveWorkerValidation,} from "../validations/worker_validation.js";
 const router = Router();
 
 /**
@@ -57,7 +57,7 @@ getWorkerCollectionRequest
 
 /**
  * @openapi
- * /api/workers/collection-requests /:requestId:
+ * /api/workers/collection-requests/{requestId}:
  *   get:
  *     summary: Get worker collection requests details by request id
  *     tags:
@@ -87,7 +87,7 @@ router.get(
 
 /**
  * @openapi
- * /api/workers/collection-requests/:requestId:
+ * /api/workers/collection-requests/{requestId}:
  *   patch:
  *     summary: Update worker collection requests details by request id
  *     tags:
@@ -112,7 +112,43 @@ router.patch(
   "/collection-requests/:requestId",
   authenticate,
   authorize(ROLES.WORKER),
+  addActualWeightValidation,
+  validate, 
   updateCollectionRequest
 );
+
+/**
+ * @openapi
+ * /api/workers/collection-requests/status/{status}:
+ *   get:
+ *     summary: Get worker collection requests by status
+ *     tags:
+ *       - Worker
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: PENDING
+ *     responses:
+ *       200:
+ *         description: Worker collection requests by status.
+ *       404:
+ *         description: Worker collection requests by status not found.
+ */
+
+router.get(
+  "/collection-requests/status/:status",
+  authenticate,
+  authorize(ROLES.WORKER),
+  getCollectionRequestByStatusValidation,
+  validate,
+  getCollectionRequestByStatus
+);
+
+
 
 export default router;

@@ -130,8 +130,8 @@ export const getWorkerCollectionRequestDetailsService = async (
   return collectionRequest;
 };
 
-export const checkWorker= async (workerId) => {
-  // Check worker
+// get collection request filter by status
+export const getCollectionRequestFilterByStatusService = async (workerId, status) => {
   const worker = await prisma.worker.findUnique({
     where: {
       user_id: workerId,
@@ -142,14 +142,8 @@ export const checkWorker= async (workerId) => {
     throw new AppError("Worker not found.", 404);
   }
 
-  return worker;
-}
-
-const getAssignedCollectionRequest = async (workerId, requestId) => {
-  const request = await prisma.collectionRequest.findFirst({
+  const collectionRequests = await prisma.collectionRequest.findMany({
     where: {
-      collection_request_id: requestId,
-
       availability: {
         workerAvailabilities: {
           some: {
@@ -157,189 +151,123 @@ const getAssignedCollectionRequest = async (workerId, requestId) => {
           },
         },
       },
+      status : status,
     },
+  });
 
-    select: {
-      collection_request_id: true,
-      user_id: true,
-      status: true,
+  return collectionRequests;
+};
+// add actual weight for collection request
+export const addActualWeightService = async (
+  workerId,
+  requestId,
+  requestGarbages
+) => {
+  return await prisma.$transaction(async (tx) => {
+    //  Check worker
+    const worker = await tx.worker.findUnique({
+      where: {
+        user_id: workerId,
+      },
+    });
 
-      requestGarbages: {
-        select: {
-          request_garbage_id: true,
+    if (!worker) {
+      throw new AppError("Worker not found.", 404);
+    }
 
-          garbageType: {
-            select: {
-              price_per_kg: true,
+    //  Check collection request
+    const collectionRequest = await tx.collectionRequest.findFirst({
+      where: {
+        collection_request_id: requestId,
+        availability: {
+          workerAvailabilities: {
+            some: {
+              user_id: workerId,
             },
           },
         },
       },
-    },
-  });
+      include: {
+        requestGarbages: true,
+      },
+    });
 
-  if (!request) {
-    throw new AppError(
-      "Collection request not found or not assigned to this worker.",
-      404
-    );
-  }
-
-  if (request.status === "COLLECTED") {
-    throw new AppError(
-      "Collection request has already been collected.",
-      400
-    );
-  }
-
-  if (request.status === "CANCELLED") {
-    throw new AppError(
-      "Collection request has been cancelled.",
-      400
-    );
-  }
-
-  return request;
-};
-
-
-const prepareGarbageUpdates = (requestGarbages, garbages) => {
-  const garbageMap = new Map(
-    garbages.map((garbage) => [
-      garbage.request_garbage_id,
-      garbage,
-    ])
-  );
-
-  let totalPoints = 0;
-
-  const updates = requestGarbages.map((item) => {
-    const garbage = garbageMap.get(item.request_garbage_id);
-
-    if (!garbage) {
+    if (!collectionRequest) {
       throw new AppError(
-        `Weight is missing for garbage ${item.request_garbage_id}`,
-        400
+        "Collection request not found or not assigned to this worker.",
+        404
       );
     }
 
-    const weight = Number(garbage.actual_weight);
 
-    if (!Number.isFinite(weight) || weight < 0) {
-      throw new AppError(
-        `Invalid weight for garbage ${item.request_garbage_id}`,
-        400
-      );
-    }
+    for (const garbage of requestGarbages) {
+      const earnedPoints = garbage.actual_weight * 10;
 
-    const pricePerKg = Number(item.garbageType.price_per_kg);
-
-    const earnedPoints = Math.floor(pricePerKg * weight);
-
-    totalPoints += earnedPoints;
-
-    return {
-      request_garbage_id: item.request_garbage_id,
-      actual_weight: weight,
-      earned_points: earnedPoints,
-    };
-  });
-
-  return {
-    updates,
-    totalPoints,
-  };
-};
-
-
-const completeCollectionRequest = async ({
-  requestId,
-  userId,
-  garbageUpdates,
-  totalPoints,
-}) => {
-  return prisma.$transaction(
-    async (tx) => {
-      for (const garbage of garbageUpdates) {
-        await tx.requestGarbage.update({
-          where: {
-            request_garbage_id: garbage.request_garbage_id,
-          },
-          data: {
-            actual_weight: garbage.actual_weight,
-            earned_points: garbage.earned_points,
-          },
-        });
-      }
-
-      await tx.customer.update({
+      await tx.requestGarbage.update({
         where: {
-          user_id: userId,
+          request_garbage_id: garbage.request_garbage_id,
         },
         data: {
-          points: {
-            increment: totalPoints,
-          },
+          actual_weight: garbage.actual_weight,
+          earned_points: earnedPoints,
         },
       });
+    }
 
-      await tx.pointsTransaction.create({
-        data: {
-          user_id: userId,
-          points: totalPoints,
-          reason: "Collection request completed",
+    //  Calculate total actual weight
+    const totalWeight = await tx.requestGarbage.aggregate({
+      where: {
+        collection_request_id: requestId,
+      },
+      _sum: {
+        actual_weight: true,
+      },
+    });
+
+    const totalActualWeight = totalWeight._sum.actual_weight ?? 0;
+
+ 
+    const totalPoints = totalActualWeight * 10;
+
+    //  Create points transaction
+    await tx.pointsTransaction.create({
+      data: {
+        user_id: collectionRequest.user_id,
+        points: totalPoints,
+        reason: "Collection Request",
+      },
+    });
+
+    //  Add points to customer
+    await tx.customer.update({
+      where: {
+        user_id: collectionRequest.user_id,
+      },
+      data: {
+        points: {
+          increment: totalPoints,
         },
-      });
+      },
+    });
 
+    //  Update collection request
+    const updatedCollectionRequest =
       await tx.collectionRequest.update({
         where: {
           collection_request_id: requestId,
         },
         data: {
+          quantity: totalActualWeight,
           status: "COLLECTED",
+        },
+        include: {
+          requestGarbages: true,
         },
       });
 
-      return {
-        totalPoints,
-      };
-    },
-    {
-      timeout: 10000,
-    }
-  );
-};
-
-export const updateCollectionRequestService = async (
-  workerId,
-  requestId,
-  garbages
-) => {
-  await checkWorker(workerId);
-
-  const request = await getAssignedCollectionRequest(
-    workerId,
-    requestId
-  );
-
-  const { updates, totalPoints } = prepareGarbageUpdates(
-    request.requestGarbages,
-    garbages
-  );
-
-  const result = await completeCollectionRequest({
-    requestId,
-    userId: request.user_id,
-    garbageUpdates: updates,
-    totalPoints,
+    return updatedCollectionRequest;
   });
-
-  return {
-    message: "Collection request updated successfully.",
-    data: result,
-  };
 };
-
 
 
 
