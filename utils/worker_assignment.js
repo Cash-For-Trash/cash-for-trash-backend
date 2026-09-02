@@ -102,12 +102,9 @@ export const reassignCollectionRequest = async (
     throw new AppError("Collection request not found.", 404);
   }
 
-  const availability = await prisma.availability.findFirst({
+  const availability = await prisma.availability.findUnique({
     where: {
-      area_id: request.area_id,
-      day_of_week: request.scheduled_day,
-      from_time: request.scheduled_from_time,
-      to_time: request.scheduled_to_time,
+      availability_id: request.availability_id,
     },
   });
 
