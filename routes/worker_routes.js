@@ -108,9 +108,9 @@ router.get(
  *           schema:
  *             type: object
  *             required:
- *               - garbages
+ *               - requestGarbages
  *             properties:
- *               garbages:
+ *               requestGarbages:
  *                 type: array
  *                 items:
  *                   type: object
