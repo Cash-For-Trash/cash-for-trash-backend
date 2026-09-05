@@ -1,95 +1,77 @@
 import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
-import stripe from "../utils/stripe.js"
-export const paymentService = async (userId, collectionRequestId) => {
-  const payment = await prisma.payment.findFirst({
-    where: {
-      collection_request_id: collectionRequestId,
-      collectionRequest: {
-        user_id: userId,
-      },
-    },
-    include: {
-      collectionRequest: {
-        select: {
-          collection_request_id: true,
-          service_price: true,
-          status: true,
-        },
-      },
-    },
-  });
+import {
+  verifyPaymobHmac,
+} from "../utils/paymob.js";
+import { cardPaymentService } from "./card_payment_services.js";
+import { notificationService } from "./notification_services.js";
 
-  if (!payment) {
-    throw new AppError("Payment not found.", 404);
-  }
+export const paymentService = async (
+    userId,
+    collectionRequestId
+) => {
 
-  if (payment.payment_status === "PAID") {
-    throw new AppError("Payment already completed.", 400);
-  }
+    const payment = await prisma.payment.findFirst({
+        where: {
+            collection_request_id: collectionRequestId,
 
-  switch (payment.payment_method) {
-    case "CASH":
-      throw new AppError(
-        "Cash payment does not require online payment.",
-        400
-      );
-
-    case "MONTHLY":
-      throw new AppError(
-        "Monthly subscription has already been paid.",
-        400
-      );
-
-case "CARD": {
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-
-    line_items: [
-      {
-        price_data: {
-          currency: "usd", 
-
-          product_data: {
-            name: "Collection Request Service",
-          },
-
-          unit_amount: Math.round(Number(payment.payment_amount) * 100),
+            collectionRequest: {
+                user_id: userId,
+            },
         },
 
-        quantity: 1,
-      },
-    ],
+        include: {
+            collectionRequest: {
+                select: {
+                    collection_request_id: true,
+                    service_price: true,
+                    status: true,
+                },
+            },
+        },
+    });
 
-    mode: "payment",
+    if (!payment) {
+        throw new AppError(
+            "Payment not found.",
+            404
+        );
+    }
 
-    success_url: `${process.env.CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+    if (payment.payment_status === "PAID") {
+        throw new AppError(
+            "Payment already completed.",
+            400
+        );
+    }
 
-    cancel_url: `${process.env.CLIENT_URL}/payment/cancel`,
+    switch (payment.payment_method) {
 
-    metadata: {
-      payment_id: payment.payment_id,
-      collection_request_id: collectionRequestId,
-      user_id: userId,
-    },
-  });
+        case "CASH":
+            throw new AppError(
+                "Cash payment does not require online payment.",
+                400
+            );
 
-  return {
-    payment_id: payment.payment_id,
-    payment_method: payment.payment_method,
-    payment_status: payment.payment_status,
-    payment_amount: payment.payment_amount,
-    payment_url: session.url,
-  };
-}
+        case "MONTHLY":
+            throw new AppError(
+                "Monthly subscription has already been paid.",
+                400
+            );
 
-    default:
-      throw new AppError("Invalid payment method.", 400);
+        case "CARD":
+            return await cardPaymentService(
+                userId,
+                payment
+            );
+
+        default:
+            throw new AppError(
+                "Invalid payment method.",
+                400
+            );
+    }
   }
-  
-};
-
-
 
 export const getPaymentHistoryService = async (userId) => {
   const payments = await prisma.payment.findMany({
@@ -117,33 +99,93 @@ export const getPaymentHistoryService = async (userId) => {
 };
 
 
-// webhook form stripe 
-export const handleStripeWebhook = async (req) => {
-  const sig = req.headers["stripe-signature"];
+// webhook 
+export const handlePaymobWebhook = async (req) => {
+  const hmacSecret =
+    process.env.PAYMOB_HMAC_SECRET;
+  
+  const { obj } = req.body;
 
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    throw new AppError(`Webhook error: ${err.message}`, 400);
+  if (!obj) {
+    throw new AppError(
+      "Invalid webhook payload: obj is missing",
+      400
+    );
   }
 
-  switch (event.type) {
-    case "checkout.session.completed": {
-      const session = event.data.object;
-      await prisma.payment.update({
-        where: { payment_id: session.metadata.payment_id },
-        data: {
-          payment_status: "PAID",
-           payment_date: new Date(),        
+  const isValid =
+    verifyPaymobHmac(
+      req.query,
+      obj,
+      hmacSecret
+    );
+
+  if (!isValid) {
+    throw new AppError(
+      "HMAC verification failed.",
+      401
+    );
+  }
+
+ const paymentId =
+  obj.payment_key_claims?.extra?.payment_id ||
+  obj.order?.merchant_order_id ||
+  obj.merchant_order_id ||
+  obj.extras?.payment_id;
+
+  if (!paymentId) {
+    console.error(
+      "Payment ID not found in Paymob webhook"
+    );
+
+    return {
+      received: true,
+    };
+  }
+
+  const payment =
+    await prisma.payment.findUnique({
+      where: {
+        payment_id: String(paymentId),
+      },
+      include: {
+        collectionRequest: {
+          select: {
+            user_id: true,
+          },
         },
-      });
-      break;
-    }
-    default:
-      console.log(`Unhandled event type ${event.type}`);
+      },
+    });
+
+  if (!payment) {
+    throw new AppError(
+      `Payment ${paymentId} not found.`,
+      404
+    );
   }
 
-  return { received: true };
-};
+  if (obj.success === true) {
+    await prisma.payment.update({
+      where: {
+        payment_id:
+          payment.payment_id,
+      },
+
+      data: {
+        payment_status: "PAID",
+        payment_date: new Date(),
+      },
+    });
+        await notificationService({
+        userId: payment.collectionRequest.user_id,
+        title: "Payment Successful",
+        message: "Your payment has been completed successfully.",
+        type: "PAYMENT_SUCCESS",
+        relatedId: payment.payment_id,
+    });
+}
+  return {
+    received: true,
+  };
+}
+  

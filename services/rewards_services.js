@@ -138,3 +138,5 @@ export const deleteRewardService = async (rewardId) => {
     throw new AppError("Failed to fetch rewards.", 500);
   }
 };
+
+

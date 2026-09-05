@@ -48,15 +48,32 @@ export const getWorkerCollectionRequestDetails = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCollectionRequestByStatus = async (req, res, next) => {
+  try {
+    const workerId = req.user.user_id;
+    const { status } = req.params;
+    const collectionRequests = await WorkerServices.getCollectionRequestFilterByStatusService(workerId, status);
+    return successResponse(
+      res,
+      `Collection requests for status ${status.toLowerCase()} retrieved successfully.`,
+      collectionRequests,
+      200
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateCollectionRequest = async (req, res, next) => {
   try {
     const { requestId } = req.params;
     const workerId = req.user.user_id;
-    const { garbages } = req.body;
-    const result = await WorkerServices.updateCollectionRequestService(workerId, requestId, garbages);
+    const { requestGarbages } = req.body;
+    const result = await WorkerServices.addActualWeightService(workerId, requestId, requestGarbages);
     return successResponse(
       res,
-      "Collection request updated successfully.",
+      "Actual weight added successfully and collection request marked as collected",
       result,
       200
     );
