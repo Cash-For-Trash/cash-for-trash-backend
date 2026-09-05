@@ -34,3 +34,15 @@ export const handlePaymobWebhookController = async (req, res) => {
         return res.status(400).send(`Webhook Error: ${error.message}`);
     }
 };
+
+export const handlePaymobCallbackController = async (req, res) => {
+    try {
+        const {success} = req.query;
+        if (success === "true") {
+            return res.redirect("/payment-success");
+        }
+        return res.redirect("/payment-failure");
+    } catch (error) {
+        return res.status(400).send(`Callback Error: ${error.message}`);
+    }   
+}
