@@ -89,7 +89,6 @@ export const createCollectionRequest = async (userId, data) => {
         collection_img,
         status: "PENDING",
         payment_method,
-       
         scheduled_day: availability.day_of_week,
         scheduled_from_time: availability.from_time,
         scheduled_to_time: availability.to_time,
