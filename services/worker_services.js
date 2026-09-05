@@ -77,104 +77,104 @@ export const getWorkerCollectionRequestService = async (workerId) => {
 
 
 // get worker collection requets details
-// export const getWorkerCollectionRequestDetailsService = async (
-//   workerId,
-//   requestId
-// ) => {
-//   const worker = await prisma.worker.findFirst({
-//     where: {
-//       user_id: workerId,
-//     },
-//   });
+export const getWorkerCollectionRequestDetailsService = async (
+  workerId,
+  requestId
+) => {
+  const worker = await prisma.worker.findFirst({
+    where: {
+      user_id: workerId,
+    },
+  });
 
-//   if (!worker) {
-//     throw new AppError("Worker not found.", 404);
-//   }
+  if (!worker) {
+    throw new AppError("Worker not found.", 404);
+  }
 
-//   const collectionRequest = await prisma.collectionRequest.findFirst({
-//     where: {
-//       collection_request_id: requestId,
-//       availability: {
-//         workerAvailabilities: {
-//           some: {
-//             user_id: workerId,
-//           },
-//         },
-//       },
-//     },
-//     select: {
-//       collection_request_id: true,
-//       status: true,
-//       request_date: true,
+  const collectionRequest = await prisma.collectionRequest.findFirst({
+    where: {
+      collection_request_id: requestId,
+      availability: {
+        workerAvailabilities: {
+          some: {
+            user_id: workerId,
+          },
+        },
+      },
+    },
+    select: {
+      collection_request_id: true,
+      status: true,
+      request_date: true,
 
-//       payment_method: true,
+      payment_method: true,
 
-//       scheduled_day: true,
-//       scheduled_from_time: true,
-//       scheduled_to_time: true,
+      scheduled_day: true,
+      scheduled_from_time: true,
+      scheduled_to_time: true,
 
-//       service_price: true,
-//       worker_share: true,
+      service_price: true,
+      worker_share: true,
 
-//       user: {
-//         select: {
-//           first_name: true,
-//           last_name: true,
-//           mobile: true,
-//         },
-//       },
+      user: {
+        select: {
+          first_name: true,
+          last_name: true,
+          mobile: true,
+        },
+      },
 
-//       payments: {
-//         select: {
-//           payment_id: true,
-//           payment_method: true,
-//           payment_status: true,
-//           payment_amount: true,
-//           payment_date: true,
-//         },
-//       },
+      payments: {
+        select: {
+          payment_id: true,
+          payment_method: true,
+          payment_status: true,
+          payment_amount: true,
+          payment_date: true,
+        },
+      },
 
-//       address: {
-//         select: {
-//           address_id: true,
-//           building_num: true,
-//           floor: true,
-//           location: true,
-//           latitude: true,
-//           longitude: true,
-//           additional_note: true,
-//         },
-//       },
+      address: {
+        select: {
+          address_id: true,
+          building_num: true,
+          floor: true,
+          location: true,
+          latitude: true,
+          longitude: true,
+          additional_note: true,
+        },
+      },
 
-//       requestGarbages: {
-//         select: {
-//           request_garbage_id: true,
-//           expected_weight: true,
-//           actual_weight: true,
-//           earned_points: true,
+      requestGarbages: {
+        select: {
+          request_garbage_id: true,
+          expected_weight: true,
+          actual_weight: true,
+          earned_points: true,
 
-//           garbageType: {
-//             select: {
-//               garbage_type_id: true,
-//               garbage_type_name: true,
-//               price_per_kg: true,
-//             },
-//           },
-//         },
-//       },
-//     },
-//   });
+          garbageType: {
+            select: {
+              garbage_type_id: true,
+              garbage_type_name: true,
+              price_per_kg: true,
+            },
+          },
+        },
+      },
+    },
+  });
  
 
-//   if (!collectionRequest) {
-//     throw new AppError(
-//       "Collection request not found or not assigned to this worker.",
-//       404
-//     );
-//   }
+  if (!collectionRequest) {
+    throw new AppError(
+      "Collection request not found or not assigned to this worker.",
+      404
+    );
+  }
 
-//   return collectionRequest;
-// };
+  return collectionRequest;
+};
 
 // get collection request filter by status
 export const getCollectionRequestFilterByStatusService = async (workerId, status) => {
