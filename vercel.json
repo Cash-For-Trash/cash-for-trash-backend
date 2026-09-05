@@ -3,10 +3,13 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/index.js"
+      "destination": "/api/index.js"
     }
   ],
   "functions": {
+    "api/index.js": {
+      "includeFiles": "node_modules/swagger-ui-dist/**"
+    },
     "index.js": {
       "includeFiles": "node_modules/swagger-ui-dist/**"
     }
