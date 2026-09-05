@@ -57,6 +57,38 @@ getWorkerCollectionRequest
 
 /**
  * @openapi
+ * /api/workers/collection-requests/status/{status}:
+ *   get:
+ *     summary: Get worker collection requests by status
+ *     tags:
+ *       - Worker
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: PENDING
+ *     responses:
+ *       200:
+ *         description: Worker collection requests by status.
+ *       404:
+ *         description: Worker collection requests by status not found.
+ */
+
+router.get(
+  "/collection-requests/status/:status",
+  authenticate,
+  authorize(ROLES.WORKER),
+  getCollectionRequestByStatusValidation,
+  validate,
+  getCollectionRequestByStatus
+);
+
+/**
+ * @openapi
  * /api/workers/collection-requests/{requestId}:
  *   get:
  *     summary: Get worker collection requests details by request id
@@ -139,39 +171,5 @@ router.patch(
   validate, 
   updateCollectionRequest
 );
-
-/**
- * @openapi
- * /api/workers/collection-requests/status/{status}:
- *   get:
- *     summary: Get worker collection requests by status
- *     tags:
- *       - Worker
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: status
- *         required: true
- *         schema:
- *           type: string
- *         example: PENDING
- *     responses:
- *       200:
- *         description: Worker collection requests by status.
- *       404:
- *         description: Worker collection requests by status not found.
- */
-
-router.get(
-  "/collection-requests/status/:status",
-  authenticate,
-  authorize(ROLES.WORKER),
-  getCollectionRequestByStatusValidation,
-  validate,
-  getCollectionRequestByStatus
-);
-
-
 
 export default router;
