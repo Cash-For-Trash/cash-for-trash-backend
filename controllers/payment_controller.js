@@ -85,7 +85,19 @@ const generatePaymentResultHtml = ({ isSuccess, paymentId, transactionId, amount
 
   <script>
     function returnToApp() {
-      window.location.href = "cashfortrash://payment-result?success=${isSuccess}&payment_id=${paymentId || ''}";
+      try {
+        window.location.href = "cashfortrash://payment-result?success=${isSuccess}&payment_id=${paymentId || ''}";
+      } catch (e) {}
+
+      setTimeout(function() {
+        try {
+          if (window.opener) {
+            window.close();
+          } else if (window.history.length > 1) {
+            window.history.back();
+          }
+        } catch(e) {}
+      }, 400);
     }
   </script>
 </body>
