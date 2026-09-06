@@ -46,3 +46,14 @@ export const handlePaymobCallbackController = async (req, res) => {
         return res.status(400).send(`Callback Error: ${error.message}`);
     }   
 }
+
+export const completeCashPaymentController = async (req, res, next) => {
+    try {
+        const { collection_request_id } = req.params;
+      const user_id = req.user.user_id;
+        const payment = await PaymentServices.completeCashPaymentService(user_id, collection_request_id);
+        return successResponse(res, "Cash payment completed successfully", payment, 200);
+    } catch (error) {
+        return next(error)
+    }
+}

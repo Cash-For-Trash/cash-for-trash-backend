@@ -188,4 +188,61 @@ export const handlePaymobWebhook = async (req) => {
     received: true,
   };
 }
+
+
+
+export const completeCashPaymentService = async (userId, paymentId) => {
+    const payment = await prisma.payment.findFirst({
+        where: {
+            payment_id: paymentId,
+            payment_method: "CASH",
+            payment_status: "PENDING",
+            collectionRequest: {
+                user_id: userId,
+            },
+        },
+        include: {
+            collectionRequest: {
+                select: {
+                    collection_request_id: true,
+                    service_price: true,
+                    status: true,
+                },
+            },
+        },
+    });
+
+    if (!payment) {
+        throw new AppError(
+            "Payment not found or already completed.",
+            404
+        );
+    }
+
+    if (payment.payment_method !== "CASH") {
+        throw new AppError(
+            "Only cash payments can be completed manually.",
+            400
+        );
+    }
+
+    if (payment.collectionRequest.status !== "PENDING") {
+        throw new AppError(
+            "Collection request is not in a state that allows payment completion.",
+            400
+        );
+    }
+
+    const updatedPayment = await prisma.payment.update({
+        where: {
+            payment_id: payment.payment_id,
+        },
+        data: {
+            payment_status: "PAID",
+            payment_date: new Date(),
+        },
+    });
+
+    return updatedPayment;
+};
   
