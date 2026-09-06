@@ -1,5 +1,6 @@
 import * as PaymentServices from "../services/payment_services.js";
 import { successResponse } from "../utils/response.js";
+import { paymentTemplate } from "../view/paymentTemplate.js";
 export const createPaymentController = async (req, res, next) => {
     try {
 
@@ -35,25 +36,55 @@ export const handlePaymobWebhookController = async (req, res) => {
     }
 };
 
+const generatePaymentResultHtml = ({ isSuccess, paymentId, transactionId, amount, currency }) => {
+  const title = isSuccess ? "Payment Successful" : "Payment Failed";
+  const subtitle = isSuccess 
+    ? "Thank you! Your payment has been processed successfully." 
+    : "Something went wrong with your transaction. Please try again.";
+  const icon = isSuccess ? "&#10003;" : "&#10005;";
+  const themeColor = isSuccess ? "#2e7d32" : "#d32f2f";
+  const bgLight = isSuccess ? "#e8f5e9" : "#ffebee";
+
+  return paymentTemplate({
+    title,
+    subtitle,
+    icon,
+    themeColor,
+    bgLight,
+    isSuccess,
+    paymentId,
+    transactionId,
+    amount,
+    currency
+  });
+};
+
 export const handlePaymobCallbackController = async (req, res) => {
     try {
-        const {success} = req.query;
-        if (success === "true") {
-            return res.redirect("/payment-success");
+        const { success, pending, id, amount_cents, currency, merchant_order_id, order } = req.query;
+        const isSuccess = success === "true" || success === true;
+        const paymentId = merchant_order_id || order || req.query.payment_id;
+        const transactionId = id;
+
+        if (isSuccess && paymentId) {
+            try {
+                await PaymentServices.handleCallbackSuccessFallback(String(paymentId));
+            } catch (dbErr) {
+                console.error("Callback fallback update notice:", dbErr.message);
+            }
         }
-        return res.redirect("/payment-failure");
+
+        const html = generatePaymentResultHtml({
+            isSuccess: isSuccess && pending !== "true",
+            paymentId,
+            transactionId,
+            amount: amount_cents ? (Number(amount_cents) / 100).toFixed(2) : null,
+            currency: currency || "EGP",
+        });
+
+        res.setHeader("Content-Type", "text/html");
+        return res.status(200).send(html);
     } catch (error) {
         return res.status(400).send(`Callback Error: ${error.message}`);
     }   
-}
-
-export const completeCashPaymentController = async (req, res, next) => {
-    try {
-        const { collection_request_id } = req.params;
-      const user_id = req.user.user_id;
-        const payment = await PaymentServices.completeCashPaymentService(user_id, collection_request_id);
-        return successResponse(res, "Cash payment completed successfully", payment, 200);
-    } catch (error) {
-        return next(error)
-    }
-}
+};

@@ -69,6 +69,14 @@ export const getWorkerCollectionRequestService = async (workerId) => {
         },
       },
     },
+    include: {
+      user: {
+        select: {
+          first_name: true,
+          last_name: true,
+        },
+      },
+    },
   });
 
   return collectionRequests;

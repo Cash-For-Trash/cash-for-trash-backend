@@ -189,8 +189,6 @@ export const handlePaymobWebhook = async (req) => {
   };
 }
 
-
-
 export const completeCashPaymentService = async (userId, paymentId) => {
     const payment = await prisma.payment.findFirst({
         where: {
@@ -246,3 +244,20 @@ export const completeCashPaymentService = async (userId, paymentId) => {
     return updatedPayment;
 };
   
+
+export const handleCallbackSuccessFallback = async (paymentId) => {
+  const payment = await prisma.payment.findUnique({
+    where: { payment_id: String(paymentId) },
+  });
+
+  if (payment && payment.payment_status !== "PAID") {
+    await prisma.payment.update({
+      where: { payment_id: String(paymentId) },
+      data: {
+        payment_status: "PAID",
+        payment_date: new Date(),
+      },
+    });
+  }
+};
+
