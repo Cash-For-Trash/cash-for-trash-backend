@@ -69,7 +69,7 @@ export const getWorkerCollectionRequestService = async (workerId) => {
         },
       },
     },
-  
+
   });
 
   return collectionRequests;
@@ -152,15 +152,15 @@ export const getCollectionRequestFilterByStatusService = async (workerId, status
           },
         },
       },
-      status : status,
-        include: {
+      status: status,
+    },
+    include: {
       user: {
         select: {
           first_name: true,
           last_name: true,
         },
       },
-    },
     },
   });
 
