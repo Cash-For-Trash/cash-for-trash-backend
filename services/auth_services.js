@@ -302,7 +302,7 @@ export const login = async (data) => {
     userId: user.user_id,
     title: "Login Successful",
     message: "You have successfully logged in.",
-    type: "LOGIN_SUCCESS",
+    type: "SYSTEM",
     relatedId: null,
   });
 
