@@ -2,7 +2,8 @@ import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
 import { calculateWorkerShare } from "../utils/pricing.js";
 import { assignWorkerForAvailability } from "../utils/worker_assignment.js";
-
+import { getNext7DaysRange } from "../utils/time.js";
+import { paginate } from "../utils/pagination.js";
 export const createCollectionRequest = async (userId, data) => {
   const {
     address_id,
@@ -12,6 +13,29 @@ export const createCollectionRequest = async (userId, data) => {
     collection_img,
     garbage_types,
   } = data;
+
+
+  const { startDate, endDate } = getNext7DaysRange();
+
+const existingRequest = await prisma.collectionRequest.findFirst({
+  where: {
+    user_id: userId,
+    request_date: {
+      gte: startDate,
+      lte: endDate
+    },
+    status: {
+      not: "CANCELLED",
+    },
+  },
+});
+
+if (existingRequest) {
+  throw new AppError(
+    "You have already booked this collection time this week.",
+    400
+  );
+}
 
   const address = await prisma.address.findFirst({
     where: {
@@ -129,8 +153,9 @@ export const createCollectionRequest = async (userId, data) => {
 
 // get customer collection request
 
-export const getCustomerCollectionRequestService = async (userId) => {
-  const collectionRequests = await prisma.collectionRequest.findMany({
+export const getCustomerCollectionRequestService = async (userId,queryParams) => {
+  return paginate( prisma.collectionRequest,queryParams,
+    {
     where: {
       user_id: userId,
     },
@@ -141,8 +166,10 @@ export const getCustomerCollectionRequestService = async (userId) => {
           garbageType: true
         }
       }
-    }
-  });
-  return collectionRequests;
-};
-
+    },
+    orderBy: {
+        request_date: 'desc'
+      }
+    
+  }
+  )};

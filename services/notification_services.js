@@ -31,19 +31,14 @@ export const notificationService = async ({
 
     for (const device of userDevices) {
         if (device.fcm_token) {
-            console.log("FCM Token: ", device.fcm_token);
-            console.log("user ID: ", userId);
-
             try {
                 await sendPushNotification(device.fcm_token, title, message);
             } catch (error) {
-                console.error("Error sending push notification:", error?.message || error);
                 const errorCode = error?.code || error?.errorInfo?.code;
                 if (
                     errorCode === "messaging/registration-token-not-registered" ||
                     errorCode === "messaging/invalid-registration-token"
                 ) {
-                    console.log(`Cleaning up expired/invalid FCM token for device ${device.device_id}`);
                     await prisma.userDevice.delete({
                         where: { device_id: device.device_id },
                     }).catch(() => { });
@@ -105,18 +100,18 @@ export const getUnreadNotificationsCountService = async (userId) => {
 }
 
 // send notification
-export const sendNotificationService = async (param1, title, message, type, relatedId = null) => {
-    if (typeof param1 === "object" && param1 !== null) {
-        return await notificationService(param1);
-    }
-    return await notificationService({
-        userId: param1,
-        title,
-        message,
-        type,
-        relatedId,
-    });
-}
+// export const sendNotificationService = async (param1, title, message, type, relatedId = null) => {
+//     if (typeof param1 === "object" && param1 !== null) {
+//         return await notificationService(param1);
+//     }
+//     return await notificationService({
+//         userId: param1,
+//         title,
+//         message,
+//         type,
+//         relatedId,
+//     });
+// }
 
 
 // mark a notification as read

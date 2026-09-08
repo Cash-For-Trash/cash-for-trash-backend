@@ -1,6 +1,7 @@
 import prisma from "../config/db.js";
 import jwt from "jsonwebtoken";
 import AppError from "../utils/app_error.js";
+import { notificationService } from "./notification_services.js";
 
 import { hashPassword, comparePassword } from "../utils/hash.js";
 
@@ -297,10 +298,17 @@ export const login = async (data) => {
     isApproved = worker.is_approved;
   }
 
+  await notificationService({
+    userId: user.user_id,
+    title: "Login Successful",
+    message: "You have successfully logged in.",
+    type: "LOGIN_SUCCESS",
+    relatedId: null,
+  });
+
   return {
     accessToken,
     refreshToken,
-
     user: {
       user_id: user.user_id,
       first_name: user.first_name,
@@ -310,10 +318,10 @@ export const login = async (data) => {
       ...(user.role === ROLES.WORKER && {
         is_approved: isApproved,
       }),
-    }
+    },
   };
-
 };
+
 
 
 //  refresh token 

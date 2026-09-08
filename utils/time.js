@@ -5,3 +5,16 @@ export const toTimeDate = (time) => {
 export const formatTime = (date) => {
     return date.toISOString().substring(11, 19);
 };
+
+export const getNext7DaysRange = () => {
+  const startDate = new Date();
+  startDate.setHours(0, 0, 0, 0);
+
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + 7);
+
+  return {
+    startDate,
+    endDate,
+  };
+};

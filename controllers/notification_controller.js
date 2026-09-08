@@ -25,15 +25,15 @@ export const getUnreadNotificationsCountController = async (req, res, next) => {
     }
 };
 
-export const sendNotificationController = async (req, res, next) => {
-    try {
-        const { userId, title, message, type, relatedId } = req.body;
-        const notification = await notificationService.sendNotificationService({ userId, title, message, type, relatedId });
-        return successResponse(res, "Notification sent successfully.", notification, 200);
-    } catch (error) {
-        next(error);
-    }
-}
+// export const sendNotificationController = async (req, res, next) => {
+//     try {
+//         const { userId, title, message, type, relatedId } = req.body;
+//         const notification = await notificationService.sendNotificationService({ userId, title, message, type, relatedId });
+//         return successResponse(res, "Notification sent successfully.", notification, 200);
+//     } catch (error) {
+//         next(error);
+//     }
+// }
 
 
 // mark a notification as read

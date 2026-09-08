@@ -47,7 +47,8 @@ export const getCustomerCollectionRequest = async (
     next
 )=>{
     try{
-        const requests = await CollectionRequestServices.getCustomerCollectionRequestService(req.user.user_id);
+        const queryParams = req.query;
+        const requests = await CollectionRequestServices.getCustomerCollectionRequestService(req.user.user_id,queryParams);
         successResponse(
             res,
             "Collection requests fetched successfully",
