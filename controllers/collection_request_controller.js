@@ -1,7 +1,7 @@
 import * as CollectionRequestServices from "../services/collection_request_services.js";
 
 import { successResponse }from "../utils/response.js";
-
+import { paginationResponse } from "../utils/response.js";
 export const createCollectionRequest = async (
     req,
     res,
@@ -49,11 +49,18 @@ export const getCustomerCollectionRequest = async (
     try{
         const queryParams = req.query;
         const requests = await CollectionRequestServices.getCustomerCollectionRequestService(req.user.user_id,queryParams);
-        successResponse(
+        paginationResponse(
             res,
             "Collection requests fetched successfully",
-            requests,
+            {
+     page: requests.page,
+     page_size: requests.page_size,
+     total_items: requests.total_items,
+     total: requests.total_pages
+            },
+            requests.data,
             200
+
         );
     }
     catch(err){

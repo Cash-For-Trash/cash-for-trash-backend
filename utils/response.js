@@ -25,3 +25,17 @@ export const errorResponse = (
     errors,
   });
 };
+
+export const paginationResponse = (res, message = "Success", { page, page_size, total_items, total }, data = null, statusCode = 200) => {
+  return res.status(statusCode).json({
+    success: true,
+    statusCode,
+    message,
+      page,
+   page_size,
+      total_items,
+      total,
+    data,
+  });
+}
+  
