@@ -2,7 +2,7 @@ import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
 import { calculateWorkerShare } from "../utils/pricing.js";
 import { assignWorkerForAvailability } from "../utils/worker_assignment.js";
-import { getNext7DaysRange } from "../utils/time.js";
+import { formatTime, getNext7DaysRange } from "../utils/time.js";
 import { paginate } from "../utils/pagination.js";
 export const createCollectionRequest = async (userId, data) => {
   const {
@@ -154,22 +154,25 @@ if (existingRequest) {
 // get customer collection request
 
 export const getCustomerCollectionRequestService = async (userId,queryParams) => {
-  return paginate( prisma.collectionRequest,queryParams,
+  const result = await paginate( prisma.collectionRequest,queryParams,
     {
     where: {
       user_id: userId,
     },
-    include: {
-      address:true,
-      requestGarbages: {
-        include: {
-          garbageType: true
-        }
-      }
-    },
     orderBy: {
         request_date: 'desc'
       }
-    
-  }
-  )};
+    }
+  )
+     
+  result.data = result.data.map((request) => ({
+    collection_request_id: request.collection_request_id,
+    request_date: request.request_date,
+    scheduled_day: request.scheduled_day,
+    scheduled_from_time: formatTime(request.scheduled_from_time),
+    scheduled_to_time: formatTime(request.scheduled_to_time),
+    status: request.status,
+  }));
+
+  return result;
+};

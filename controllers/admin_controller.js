@@ -1,10 +1,16 @@
 import * as AdminService from "../services/admin_services.js";
-import { successResponse } from "../utils/response.js";
+import { successResponse,paginationResponse } from "../utils/response.js";
 
 export const getCustomers = async (req, res, next) => {
   try {
     const result = await AdminService.getCustomers(req.query);
-    return successResponse(res, "Customers retrieved successfully.", result, 200);
+    return paginationResponse(res, "Customers retrieved successfully.",
+      {
+       page: result.page,
+       page_size: result.page_size,
+       total_items: result.total_items,
+       total: result.total_pages
+      }, result.data, 200);
   } catch (error) {
     next(error);
   }
@@ -22,7 +28,13 @@ export const getCustomerDetails = async (req, res, next) => {
 export const getWorkers = async (req, res, next) => {
   try {
     const result = await AdminService.getWorkers(req.query);
-    return successResponse(res, "Workers retrieved successfully.", result, 200);
+    return paginationResponse(res, "Workers retrieved successfully.",
+      {
+       page: result.page,
+       page_size: result.page_size,
+       total_items: result.total_items,
+       total: result.total_pages
+      }, result.data, 200);
   } catch (error) {
     next(error);
   }
