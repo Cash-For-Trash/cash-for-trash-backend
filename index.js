@@ -59,7 +59,15 @@ app.use("/api/webhook", webhooksRoutes);
 app.use("/api/userdevice", userDeviceRoutes);
 app.use("/api/notification", notificationRoutes);
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      docExpansion: "list",
+    },
+  }),
+);
 
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");

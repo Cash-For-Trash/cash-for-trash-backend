@@ -156,8 +156,10 @@ if (existingRequest) {
 export const getCustomerCollectionRequestService = async (userId,queryParams) => {
   const result = await paginate( prisma.collectionRequest,queryParams,
     {
+    
     where: {
       user_id: userId,
+      status: queryParams.status ? queryParams.status : undefined,
     },
     orderBy: {
         request_date: 'desc'
@@ -176,3 +178,28 @@ export const getCustomerCollectionRequestService = async (userId,queryParams) =>
 
   return result;
 };
+
+
+export const getCustomerCollectionRequestDetailsService = async (userId, requestId) => {
+  const request = await prisma.collectionRequest.findFirst({
+    where: {
+      collection_request_id: requestId,
+      user_id: userId,
+    },
+    include: {
+      address: true,
+      requestGarbages: {
+        include: {
+          garbageType: {
+            select: {
+              garbage_type_id: true,
+              garbage_type_name: true,
+            },
+          },
+        },
+      },
+      payments: true,
+    },
+  });
+  return request;
+}

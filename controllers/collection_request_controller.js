@@ -67,3 +67,25 @@ export const getCustomerCollectionRequest = async (
         next(err);
     }
 };
+
+
+
+export const getCustomerCollectionRequestDetails = async (
+    req,
+    res,
+    next
+)=>{
+    try{
+        const request = await CollectionRequestServices.getCustomerCollectionRequestDetailsService(req.user.user_id, req.params.requestId);
+        successResponse(
+            res,
+            "Collection request details fetched successfully.",
+            request,
+            200
+        );
+    }
+    catch(err){
+        next(err);
+    }
+};
+    

@@ -34,6 +34,16 @@ const options = {
       { name: "Collection Requests", description: "Waste collection scheduling & pickup management" },
       { name: "Admin", description: "Worker approval, user monitoring & admin operations" },
       { name: "Rewards", description: "Rewards catalog management" },
+      { name: "Reward Redeems", description: "Customer reward redemption & history" },
+      { name: "Areas", description: "Service area management & pricing" },
+      { name: "Availabilities", description: "Worker availability scheduling" },
+      { name: "Workers", description: "Worker profile management & task assignment" },
+      { name: "Pricing", description: "Pricing management for waste collection" },
+      { name: "Payment", description: "Payment processing & transaction history" },
+      { name: "Webhooks", description: "Webhook endpoints for external services" },
+      { name: "User Device", description: "User device registration for push notifications" },
+      { name: "Notification", description: "Notification management & delivery" },
+      
     ],
     components: {
       securitySchemes: {
@@ -294,8 +304,8 @@ const options = {
     },
   },
   apis: [
-    path.join(process.cwd(), "routes", "*.js"),
-    path.join(__dirname, "routes", "*.js"),
+    path.join(process.cwd(), "routes", "*.js").replace(/\\/g, "/"),
+    path.join(__dirname, "routes", "*.js").replace(/\\/g, "/"),
   ],
 };
 
