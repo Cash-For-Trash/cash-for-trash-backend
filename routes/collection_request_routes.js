@@ -139,16 +139,17 @@ router.get(
  * /api/collection-requests/{requestId}:
  *   get:
  *     summary: Get collection request details by ID
- *    tags:
- *    - Collection Requests
- *   security:
- *     - bearerAuth: []
- *  responses:
- *    200:
- *      description: Collection request details retrieved successfully.
- *  404:
- *      description: Collection request not found.
- *    401:
+ *     tags:
+ *       - Collection Requests
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Collection request details retrieved successfully.
+ *       404:
+ *         description: Collection request not found.
+ *       401:
+ *         description: Authentication required.
  */
 
  router.get(
