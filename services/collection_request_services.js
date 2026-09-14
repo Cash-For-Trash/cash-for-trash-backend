@@ -153,20 +153,34 @@ if (existingRequest) {
 
 // get customer collection request
 
-export const getCustomerCollectionRequestService = async (userId,queryParams) => {
-  const result = await paginate( prisma.collectionRequest,queryParams,
-    {
-    
+const VALID_COLLECTION_STATUSES = [
+  "PENDING",
+  "NEEDS_RESCHEDULE",
+  "ACCEPTED",
+  "ON_THE_WAY",
+  "COLLECTED",
+  "CANCELLED",
+];
+
+export const getCustomerCollectionRequestService = async (userId, queryParams) => {
+  const normalizedStatus = queryParams?.status
+    ? queryParams.status.toString().toUpperCase()
+    : undefined;
+
+  const filterStatus = VALID_COLLECTION_STATUSES.includes(normalizedStatus)
+    ? normalizedStatus
+    : undefined;
+
+  const result = await paginate(prisma.collectionRequest, queryParams, {
     where: {
       user_id: userId,
-      status: queryParams.status ? queryParams.status : undefined,
+      status: filterStatus,
     },
     orderBy: {
-        request_date: 'desc'
-      }
-    }
-  )
-     
+      request_date: "desc",
+    },
+  });
+
   result.data = result.data.map((request) => ({
     collection_request_id: request.collection_request_id,
     request_date: request.request_date,
