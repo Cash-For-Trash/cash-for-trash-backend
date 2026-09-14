@@ -2,7 +2,8 @@ import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
 import { calculateWorkerShare } from "../utils/pricing.js";
 import { assignWorkerForAvailability } from "../utils/worker_assignment.js";
-
+import { formatTime, getNext7DaysRange } from "../utils/time.js";
+import { paginate } from "../utils/pagination.js";
 export const createCollectionRequest = async (userId, data) => {
   const {
     address_id,
@@ -12,6 +13,29 @@ export const createCollectionRequest = async (userId, data) => {
     collection_img,
     garbage_types,
   } = data;
+
+
+  const { startDate, endDate } = getNext7DaysRange();
+
+const existingRequest = await prisma.collectionRequest.findFirst({
+  where: {
+    user_id: userId,
+    request_date: {
+      gte: startDate,
+      lte: endDate
+    },
+    status: {
+      not: "CANCELLED",
+    },
+  },
+});
+
+if (existingRequest) {
+  throw new AppError(
+    "You have already booked this collection time this week.",
+    400
+  );
+}
 
   const address = await prisma.address.findFirst({
     where: {
@@ -130,20 +154,67 @@ export const createCollectionRequest = async (userId, data) => {
 
 // get customer collection request
 
-export const getCustomerCollectionRequestService = async (userId) => {
-  const collectionRequests = await prisma.collectionRequest.findMany({
+const VALID_COLLECTION_STATUSES = [
+  "PENDING",
+  "NEEDS_RESCHEDULE",
+  "ACCEPTED",
+  "ON_THE_WAY",
+  "COLLECTED",
+  "CANCELLED",
+];
+
+export const getCustomerCollectionRequestService = async (userId, queryParams) => {
+  const normalizedStatus = queryParams?.status
+    ? queryParams.status.toString().toUpperCase()
+    : undefined;
+
+  const filterStatus = VALID_COLLECTION_STATUSES.includes(normalizedStatus)
+    ? normalizedStatus
+    : undefined;
+
+  const result = await paginate(prisma.collectionRequest, queryParams, {
     where: {
+      user_id: userId,
+      status: filterStatus,
+    },
+    orderBy: {
+      request_date: "desc",
+    },
+  });
+
+  result.data = result.data.map((request) => ({
+    collection_request_id: request.collection_request_id,
+    request_date: request.request_date,
+    scheduled_day: request.scheduled_day,
+    scheduled_from_time: formatTime(request.scheduled_from_time),
+    scheduled_to_time: formatTime(request.scheduled_to_time),
+    status: request.status,
+  }));
+
+  return result;
+};
+
+
+export const getCustomerCollectionRequestDetailsService = async (userId, requestId) => {
+  const request = await prisma.collectionRequest.findFirst({
+    where: {
+      collection_request_id: requestId,
       user_id: userId,
     },
     include: {
-      address:true,
+      address: true,
       requestGarbages: {
         include: {
-          garbageType: true
-        }
-      }
-    }
+          garbageType: {
+            select: {
+              garbage_type_id: true,
+              garbage_type_name: true,
+            },
+          },
+        },
+      },
+      payments: true,
+    },
   });
-  return collectionRequests;
-};
-
+  return request;
+}

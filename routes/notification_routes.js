@@ -4,7 +4,6 @@ import {
     getNotificationsController,
     readNotificationController,
     getUnreadNotificationsCountController,
-    sendNotificationController
 } from "../controllers/notification_controller.js"
 
 const router = Router()
@@ -68,40 +67,40 @@ router.patch("/:notification_id/read", authenticate, readNotificationController)
 
 router.get("/my-notifications-count", authenticate, getUnreadNotificationsCountController);
 
-/**
- * @openapi
- * /api/notification/send-notification:
- *   post:
- *     summary: Send a notification
- *     tags:
- *       - Notification
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userId: 
- *                 type: string
- *                 example: "1"
- *               title: 
- *                 type: string
- *                 example: "Notification"
- *               message: 
- *                 type: string
- *                 example: "Notification message"
- *             required:
- *               - userId
- *               - title
- *               - message
- *     responses:
- *       200:
- *         description: Notification sent successfully
- */
+// /**
+//  * @openapi
+//  * /api/notification/send-notification:
+//  *   post:
+//  *     summary: Send a notification
+//  *     tags:
+//  *       - Notification
+//  *     security:
+//  *       - bearerAuth: []
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/json:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               userId: 
+//  *                 type: string
+//  *                 example: "1"
+//  *               title: 
+//  *                 type: string
+//  *                 example: "Notification"
+//  *               message: 
+//  *                 type: string
+//  *                 example: "Notification message"
+//  *             required:
+//  *               - userId
+//  *               - title
+//  *               - message
+//  *     responses:
+//  *       200:
+//  *         description: Notification sent successfully
+//  */
 
-router.post("/send-notification", authenticate, sendNotificationController)
+// router.post("/send-notification", authenticate, sendNotificationController)
 
 export default router

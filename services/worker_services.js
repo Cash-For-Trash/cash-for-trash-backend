@@ -69,6 +69,7 @@ export const getWorkerCollectionRequestService = async (workerId) => {
         },
       },
     },
+
   });
 
   return collectionRequests;
@@ -197,7 +198,15 @@ export const getCollectionRequestFilterByStatusService = async (workerId, status
           },
         },
       },
-      status : status,
+      status: status,
+    },
+    include: {
+      user: {
+        select: {
+          first_name: true,
+          last_name: true,
+        },
+      },
     },
   });
 
@@ -209,93 +218,131 @@ export const addActualWeightService = async (
   requestId,
   requestGarbages
 ) => {
+
+
   const POINTS_PER_KG = 10;
 
-  return await prisma.$transaction(async (tx) => {
-    const collectionRequest = await tx.collectionRequest.findFirst({
-      where: {
-        collection_request_id: requestId,
-        availability: {
-          workerAvailabilities: {
-            some: { user_id: workerId },
-          },
-        },
-      },
-      select: {
-        status: true,
-        user_id: true,
-      },
-    });
+  await prisma.customer.findFirst({
+    select: {
+      user_id: true,
+    },
+  });
 
-    if (!collectionRequest) {
-      throw new AppError(
-        "Collection request not found or not assigned to this worker.",
-        404
-      );
-    }
-
-    if (collectionRequest.status === "COLLECTED") {
-      throw new AppError("Collection request already collected.", 409);
-    }
-
-    let totalActualWeight = 0;
-
-    const garbageUpdatePromises = requestGarbages.map((garbage) => {
+  const totalActualWeight = requestGarbages.reduce(
+    (total, garbage) => {
       const actualWeight = Number(garbage.actual_weight) || 0;
-      totalActualWeight += actualWeight;
-      const earnedPoints = actualWeight * POINTS_PER_KG;
 
-      return tx.requestGarbage.update({
-        where: {
-          request_garbage_id: garbage.request_garbage_id,
-          collection_request_id: requestId, 
-        },
-        data: {
-          actual_weight: actualWeight,
-          earned_points: earnedPoints,
-        },
-      });
-    });
+      return total + actualWeight;
+    },
+    0
+  );
 
-    await Promise.all(garbageUpdatePromises);
+  const totalPoints = totalActualWeight * POINTS_PER_KG;
 
-    const totalPoints = totalActualWeight * POINTS_PER_KG;
 
-    const [_, __, updatedCollectionRequest] = await Promise.all([
-      tx.pointsTransaction.create({
+  const updatedCollectionRequest = await prisma.$transaction(
+    async (tx) => {
+
+      const collectionRequest =
+        await tx.collectionRequest.findFirst({
+          where: {
+            collection_request_id: requestId,
+            availability: {
+              workerAvailabilities: {
+                some: {
+                  user_id: workerId,
+                },
+              },
+            },
+          },
+          select: {
+            status: true,
+            user_id: true,
+          },
+        });
+
+      if (!collectionRequest) {
+        throw new AppError(
+          "Collection request not found or not assigned to this worker.",
+          404
+        );
+      }
+
+      if (collectionRequest.status === "COLLECTED") {
+        throw new AppError(
+          "Collection request already collected.",
+          409
+        );
+      }
+
+      for (const garbage of requestGarbages) {
+        const actualWeight =
+          Number(garbage.actual_weight) || 0;
+        await tx.requestGarbage.update({
+          where: {
+            request_garbage_id:
+              garbage.request_garbage_id,
+          },
+          data: {
+            actual_weight: actualWeight,
+            earned_points:
+              actualWeight * POINTS_PER_KG,
+          },
+        });
+
+      }
+
+
+      await tx.pointsTransaction.create({
         data: {
           user_id: collectionRequest.user_id,
           points: totalPoints,
           reason: "Collection Request",
         },
-      }),
+      });
 
-         
-      tx.customer.update({
-        where: { user_id: collectionRequest.user_id },
+
+      await tx.customer.update({
+        where: {
+          user_id: collectionRequest.user_id,
+        },
         data: {
           points: { increment: totalPoints },
         },
-      }),
+      });
 
-  
-      tx.collectionRequest.update({
-        where: { collection_request_id: requestId },
-        data: {
-          quantity: totalActualWeight,
-          status: "COLLECTED",
-        },
-        include: {
-          requestGarbages: true,
-        },
-      }),
-    ]);
+      const result =
+        await tx.collectionRequest.update({
+          where: {
+            collection_request_id: requestId,
+          },
+          data: {
+            quantity: totalActualWeight,
+            status: "COLLECTED",
+          },
+        });
 
-    return updatedCollectionRequest;
-  },{
-    timeout: 10000,
-    maxWait: 15000,
-  });
+      return result;
+    },
+    {
+      maxWait: 10000,
+      timeout: 15000,
+    }
+  );
+
+  const finalResult =
+    await prisma.collectionRequest.findUnique({
+      where: {
+        collection_request_id:
+          updatedCollectionRequest.collection_request_id,
+      },
+      include: {
+        requestGarbages: true,
+      },
+    });
+  return finalResult;
 };
+
+
 
 

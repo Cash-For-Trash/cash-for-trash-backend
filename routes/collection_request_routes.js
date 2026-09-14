@@ -1,6 +1,5 @@
 import { Router } from "express";
-
-import { createCollectionRequest, getCustomerCollectionRequest } from "../controllers/collection_request_controller.js";
+import { createCollectionRequest, getCustomerCollectionRequest,getCustomerCollectionRequestDetails } from "../controllers/collection_request_controller.js";
 import { getAvailableSlots } from "../controllers/address_controller.js";
 import { createCollectionRequestValidation } from "../validations/collection_request_validation.js";
 import { authenticate, validate } from "../middlewares/auth_middleware.js";
@@ -134,4 +133,29 @@ router.get(
   getCustomerCollectionRequest
 );
 
+
+/**
+ * @openapi
+ * /api/collection-requests/{requestId}:
+ *   get:
+ *     summary: Get collection request details by ID
+ *     tags:
+ *       - Collection Requests
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Collection request details retrieved successfully.
+ *       404:
+ *         description: Collection request not found.
+ *       401:
+ *         description: Authentication required.
+ */
+
+ router.get(
+  "/:requestId",
+  authenticate,
+  authorize(ROLES.CUSTOMER),
+  getCustomerCollectionRequestDetails 
+);
 export default router;

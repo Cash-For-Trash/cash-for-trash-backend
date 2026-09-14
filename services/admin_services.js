@@ -4,7 +4,7 @@ import { paginate } from "../utils/pagination.js";
 import { ROLES } from "../utils/constants.js";
 
 export const getCustomers = async (query) => {
-  const result = await paginate(prisma.user, query, {
+  return await paginate(prisma.user, query, {
     where: { role: ROLES.CUSTOMER },
     select: {
       user_id: true,
@@ -22,18 +22,6 @@ export const getCustomers = async (query) => {
     },
   });
 
-  result.data = result.data.map((user) => ({
-    id: user.user_id,
-    first_name: user.first_name,
-    last_name: user.last_name,
-    image: user.image,
-    email: user.email,
-    is_verified: user.is_verified,
-    is_active: user.is_active,
-    points: user.customer ? Number(user.customer.points) : 0,
-  }));
-
-  return result;
 };
 
 export const getCustomerDetails = async (userId) => {
@@ -63,7 +51,7 @@ export const getCustomerDetails = async (userId) => {
 };
 
 export const getWorkers = async (query) => {
-  const result = await paginate(prisma.user, query, {
+  return await paginate(prisma.user, query, {
     where: { role: ROLES.WORKER },
     select: {
       user_id: true,
@@ -76,17 +64,7 @@ export const getWorkers = async (query) => {
     },
   });
 
-  result.data = result.data.map((user) => ({
-    id: user.user_id,
-    first_name: user.first_name,
-    last_name: user.last_name,
-    image: user.image,
-    email: user.email,
-    is_verified: user.is_verified,
-    is_active: user.is_active,
-  }));
 
-  return result;
 };
 
 export const getWorkerDetails = async (userId) => {

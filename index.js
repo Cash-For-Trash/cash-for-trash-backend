@@ -59,7 +59,15 @@ app.use("/api/webhook", webhooksRoutes);
 app.use("/api/userdevice", userDeviceRoutes);
 app.use("/api/notification", notificationRoutes);
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    swaggerOptions: {
+      docExpansion: "list",
+    },
+  }),
+);
 
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -82,7 +90,7 @@ app.use((req, res) => {
 
 app.use(errorHandler);
 
-if (!process.env.VERCEL) {
+if (process.env.NODE_ENV !== "test" && !process.env.VERCEL) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
@@ -90,3 +98,4 @@ if (!process.env.VERCEL) {
 }
 
 export default app;
+
