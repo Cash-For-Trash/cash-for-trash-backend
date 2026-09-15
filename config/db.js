@@ -22,4 +22,4 @@ if (!process.env.VERCEL) {
     });
 }
 
-export default prisma;
+export default prisma;

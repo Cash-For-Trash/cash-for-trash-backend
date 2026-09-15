@@ -118,6 +118,7 @@ if (existingRequest) {
         scheduled_to_time: availability.to_time,
         service_price: servicePrice,
         worker_share: workerShare,
+
       },
     });
 

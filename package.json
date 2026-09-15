@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/client": "^6.19.3",
+    "@prisma/client": "^6.4.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.10.0",
     "compression": "^1.8.1",
@@ -34,7 +34,7 @@
     "mysql2": "^3.22.5",
     "nodemailer": "^9.0.3",
     "otp-generator": "^4.0.1",
-    "prisma": "^6.19.3",
+    "prisma": "^6.4.0",
     "stripe": "^22.4.0",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"
