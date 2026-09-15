@@ -4,7 +4,7 @@ import { paginate } from "../utils/pagination.js";
 import { ROLES } from "../utils/constants.js";
 
 export const getCustomers = async (query) => {
-  return await paginate(prisma.user, query, {
+  const result = await paginate(prisma.user, query, {
     where: { role: ROLES.CUSTOMER },
     select: {
       user_id: true,
@@ -22,6 +22,12 @@ export const getCustomers = async (query) => {
     },
   });
 
+  result.data = result.data.map(({ customer, ...user }) => ({
+    ...user,
+    points: customer ? Number(customer.points) : 0,
+  }));
+
+  return result;
 };
 
 export const getCustomerDetails = async (userId) => {
