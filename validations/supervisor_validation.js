@@ -1,36 +1,6 @@
-import { query, param, body } from "express-validator";
+import { body, param, query } from "express-validator";
 
-export const getListValidation = [
-  query("page")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("Page must be a positive integer."),
-  query("page_size")
-    .optional()
-    .isInt({ min: 1 })
-    .withMessage("Page size must be a positive integer."),
-];
-export const userIdParamValidation = [
-  param("user_id")
-    .notEmpty()
-    .withMessage("User ID is required.")
-    .isString()
-    .withMessage("User ID must be a string."),
-];
-
-export const updatePointSettingsValidation = [
-  body("points")
-    .notEmpty()
-    .withMessage("Points are required.")
-    .isInt({ min: 0 })
-    .withMessage("Points must be a positive integer."),
-  body("cash_value")
-    .notEmpty()
-    .withMessage("Cash value is required.")
-    .isFloat({ min: 0 })
-    .withMessage("Cash value must be a positive number."),
-];
-export const createSupervisorValidation = [
+export const createWorkerValidation = [
   body("first_name")
     .trim()
     .notEmpty()
@@ -64,14 +34,19 @@ export const createSupervisorValidation = [
     .trim()
     .isMobilePhone()
     .withMessage("Must be a valid mobile phone number."),
+
+  body("national_id")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ min: 14, max: 14 })
+    .withMessage("National ID must be exactly 14 digits."),
 ];
 
-export const updateSupervisorValidation = [
-  param("user_id")
+export const updateWorkerValidation = [
+  param("id")
+    .trim()
     .notEmpty()
-    .withMessage("User ID is required.")
-    .isString()
-    .withMessage("User ID must be a string."),
+    .withMessage("Worker ID is required."),
 
   body("first_name")
     .optional()
@@ -98,9 +73,37 @@ export const updateSupervisorValidation = [
     .isMobilePhone()
     .withMessage("Must be a valid mobile phone number."),
 
+  body("national_id")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ min: 14, max: 14 })
+    .withMessage("National ID must be exactly 14 digits."),
+
   body("is_active")
     .optional()
     .isBoolean()
     .withMessage("is_active must be a boolean."),
+
+  body("is_approved")
+    .optional()
+    .isBoolean()
+    .withMessage("is_approved must be a boolean."),
 ];
 
+export const workerIdParamValidation = [
+  param("id")
+    .trim()
+    .notEmpty()
+    .withMessage("Worker ID is required."),
+];
+
+export const getWorkersQueryValidation = [
+  query("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page must be a positive integer."),
+  query("page_size")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page size must be a positive integer."),
+];

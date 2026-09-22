@@ -19,7 +19,7 @@ export const approveWorker = async (req, res, next) => {
 
 export const getWorkerCollectionRequest = async (req, res, next) => {
   try {
-    const workerId  = req.user.user_id;
+    const workerId = req.targetWorkerId || req.user.user_id;
     const collectionRequests = await WorkerServices.getWorkerCollectionRequestService(workerId);
     return successResponse(
       res,  
@@ -36,7 +36,7 @@ export const getWorkerCollectionRequest = async (req, res, next) => {
 export const getWorkerCollectionRequestDetails = async (req, res, next) => {
   try {
     const { requestId } = req.params;
-    const workerId = req.user.user_id;
+    const workerId = req.targetWorkerId || req.user.user_id;
     const collectionRequestDetails = await WorkerServices.getWorkerCollectionRequestDetailsService(workerId, requestId);
     return successResponse(
       res,
@@ -51,7 +51,7 @@ export const getWorkerCollectionRequestDetails = async (req, res, next) => {
 
 export const getCollectionRequestByStatus = async (req, res, next) => {
   try {
-    const workerId = req.user.user_id;
+    const workerId = req.targetWorkerId || req.user.user_id;
     const { status } = req.params;
     const collectionRequests = await WorkerServices.getCollectionRequestFilterByStatusService(workerId, status);
     return successResponse(
@@ -68,7 +68,7 @@ export const getCollectionRequestByStatus = async (req, res, next) => {
 export const updateCollectionRequest = async (req, res, next) => {
   try {
     const { requestId } = req.params;
-    const workerId = req.user.user_id;
+    const workerId = req.targetWorkerId || req.user.user_id;
     const { requestGarbages } = req.body;
     const result = await WorkerServices.addActualWeightService(workerId, requestId, requestGarbages);
     return successResponse(

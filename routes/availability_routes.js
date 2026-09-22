@@ -8,6 +8,10 @@ import { authenticate, validate } from "../middlewares/auth_middleware.js";
 
 import { authorize } from "../middlewares/roles_middleware.js";
 
+import { resolveTargetWorker } from "../middlewares/worker_resolution_middleware.js";
+
+import { ROLES } from "../utils/constants.js";
+
 const router = Router();
 /**
  * @openapi
@@ -16,7 +20,7 @@ const router = Router();
  *     tags:
  *       - Availability
  *     summary: Create worker availability
- *     description: Creates a new availability for the authenticated worker.
+ *     description: Creates a new availability for the authenticated worker or targeted worker for supervisor.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -39,7 +43,7 @@ const router = Router();
  *       409:
  *         description: Availability already exists or overlaps.
  */
-router.post("/",authenticate,authorize("worker"),createAvailabilityValidation,validate,createAvailability);
+router.post(["/", "/:workerId"], authenticate, authorize(ROLES.WORKER, ROLES.SUPERVISOR), resolveTargetWorker, createAvailabilityValidation, validate, createAvailability);
 /**
  * @openapi
  * /api/availabilities/my:
@@ -47,7 +51,7 @@ router.post("/",authenticate,authorize("worker"),createAvailabilityValidation,va
  *     tags:
  *       - Availability
  *     summary: Get all availabilities for the logged-in worker
- *     description: Returns all availability slots assigned to the authenticated worker.
+ *     description: Returns all availability slots assigned to the authenticated worker or specified worker for supervisor.
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -70,9 +74,9 @@ router.post("/",authenticate,authorize("worker"),createAvailabilityValidation,va
  *       401:
  *         description: Unauthorized.
  *       403:
- *         description: Only workers can access this endpoint.
+ *         description: Only workers or supervisors can access this endpoint.
  */
-router.get("/my",authenticate,authorize("worker"),getMyAvailabilities);
+router.get(["/my", "/worker/:workerId"], authenticate, authorize(ROLES.WORKER, ROLES.SUPERVISOR), resolveTargetWorker, getMyAvailabilities);
 /**
  * @openapi
  * /api/availabilities/{availability_id}:
@@ -80,7 +84,7 @@ router.get("/my",authenticate,authorize("worker"),getMyAvailabilities);
  *     tags:
  *       - Availability
  *     summary: Update worker availability
- *     description: Update one of the authenticated worker's availability slots.
+ *     description: Update one of the worker's availability slots.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -139,12 +143,12 @@ router.get("/my",authenticate,authorize("worker"),getMyAvailabilities);
  *       401:
  *         description: Unauthorized.
  *       403:
- *         description: Only workers can update availability.
+ *         description: Only workers or supervisors can update availability.
  *       404:
  *         description: Availability not found.
  *       409:
  *         description: Availability overlaps with another availability.
  */
-router.patch("/:availability_id",authenticate,authorize("worker"),updateAvailabilityValidation,validate,updateAvailability);
+router.patch(["/:availability_id", "/worker/:workerId/:availability_id"], authenticate, authorize(ROLES.WORKER, ROLES.SUPERVISOR), resolveTargetWorker, updateAvailabilityValidation, validate, updateAvailability);
 
 export default router;

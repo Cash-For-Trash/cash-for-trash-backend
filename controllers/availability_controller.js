@@ -3,8 +3,9 @@ import { successResponse } from "../utils/response.js";
 
 export const createAvailability = async (req, res, next) => {
   try {
+    const workerId = req.targetWorkerId || req.user.user_id;
     const availability = await AvailabilityServices.createAvailability(
-      req.user.user_id,
+      workerId,
       req.body
     );
 
@@ -27,8 +28,9 @@ export const createAvailability = async (req, res, next) => {
 
 export const getMyAvailabilities = async (req, res, next) => {
   try {
+    const workerId = req.targetWorkerId || req.user.user_id;
     const data = await AvailabilityServices.getMyAvailabilities(
-      req.user.user_id
+      workerId
     );
 
     return successResponse(
@@ -44,8 +46,9 @@ export const getMyAvailabilities = async (req, res, next) => {
 
 export const updateAvailability = async (req, res, next) => {
   try {
+    const workerId = req.targetWorkerId || req.user.user_id;
     const availability = await AvailabilityServices.updateAvailability(
-      req.user.user_id,
+      workerId,
       req.params.availability_id,
       req.body
     );

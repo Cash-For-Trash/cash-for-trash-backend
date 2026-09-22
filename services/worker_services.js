@@ -103,23 +103,69 @@ export const getWorkerCollectionRequestDetailsService = async (
         },
       },
     },
-    include: {
+    select: {
+      collection_request_id: true,
+      status: true,
+      request_date: true,
+
+      payment_method: true,
+
+      scheduled_day: true,
+      scheduled_from_time: true,
+      scheduled_to_time: true,
+
+      service_price: true,
+      worker_share: true,
+
       user: {
         select: {
           first_name: true,
           last_name: true,
-          email: true,
           mobile: true,
         },
       },
-      address: true,
+
+      payments: {
+        select: {
+          payment_id: true,
+          payment_method: true,
+          payment_status: true,
+          payment_amount: true,
+          payment_date: true,
+        },
+      },
+
+      address: {
+        select: {
+          address_id: true,
+          building_num: true,
+          floor: true,
+          location: true,
+          latitude: true,
+          longitude: true,
+          additional_note: true,
+        },
+      },
+
       requestGarbages: {
-        include: {
-          garbageType: true,
+        select: {
+          request_garbage_id: true,
+          expected_weight: true,
+          actual_weight: true,
+          earned_points: true,
+
+          garbageType: {
+            select: {
+              garbage_type_id: true,
+              garbage_type_name: true,
+              price_per_kg: true,
+            },
+          },
         },
       },
     },
   });
+ 
 
   if (!collectionRequest) {
     throw new AppError(
@@ -166,8 +212,6 @@ export const getCollectionRequestFilterByStatusService = async (workerId, status
 
   return collectionRequests;
 };
-// add actual weight for collection request
-
 // add actual weight for collection request
 export const addActualWeightService = async (
   workerId,
@@ -263,9 +307,7 @@ export const addActualWeightService = async (
           user_id: collectionRequest.user_id,
         },
         data: {
-          points: {
-            increment: totalPoints,
-          },
+          points: { increment: totalPoints },
         },
       });
 
