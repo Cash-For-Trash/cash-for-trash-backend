@@ -81,3 +81,37 @@ export const updateCollectionRequest = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const getCollectionRequestToday = async (req, res, next) => {
+  try {
+    const workerId = req.user.user_id;
+    const collectionRequests = await WorkerServices.getCollectionRequestTodayService(workerId);
+    return successResponse(
+      res,
+      "Today's collection requests retrieved successfully.",
+      collectionRequests,
+      200
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+//get collection request for today details
+export const getCollectionRequestTodayDetails = async (req, res, next) => {
+  try {
+    const { requestId } = req.params;
+    const workerId = req.user.user_id;
+    const collectionRequestDetails = await WorkerServices.getCollectionRequestTodayDetailsService(workerId, requestId);
+    return successResponse(
+      res,
+      "Today's collection request details retrieved successfully.",
+      collectionRequestDetails,
+      200
+    );
+  } catch (error) {
+    next(error);
+  }
+};

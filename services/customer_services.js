@@ -4,15 +4,33 @@ import AppError from "../utils/app_error.js";
 export const getCustomerPoints = async (userId) => {
   const customer = await prisma.customer.findUnique({
     where: { user_id: userId },
+    select: {
+      user_id: true,
+      points: true,
+  
+    },
   });
 
   if (!customer) {
     throw new AppError("Customer profile not found.", 404);
   }
+  const pointSetting = await prisma.pointSetting.findFirst({
+    where: {
+      is_active: true,
+    },
+  });
 
+  if (!pointSetting) {
+    throw new AppError("Point setting not found.", 404);
+  }
+
+  const value = 
+    (Number(customer.points) * Number(pointSetting.cash_value)) /
+    Number(pointSetting.points);
   return {
     user_id: customer.user_id,
     points: Number(customer.points),
+    value
   };
 };
 

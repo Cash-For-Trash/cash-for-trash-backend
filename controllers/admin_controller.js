@@ -48,3 +48,14 @@ export const getWorkerDetails = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const updatePointSettings = async (req, res, next) => {
+  try {
+    const updatedPointSetting = await AdminService.updatePointSettings(req.body);
+return successResponse(res, "Point settings updated successfully.", updatedPointSetting, 200);
+  }
+  catch (error) {  
+    next(error);
+  }
+};

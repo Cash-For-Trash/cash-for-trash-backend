@@ -4,10 +4,12 @@ import {
   getCustomerDetails,
   getWorkers,
   getWorkerDetails,
+  updatePointSettings,
 } from "../controllers/admin_controller.js";
 import {
   getListValidation,
   userIdParamValidation,
+  updatePointSettingsValidation,
 } from "../validations/admin_validation.js";
 import { authenticate, validate } from "../middlewares/auth_middleware.js";
 import { authorize } from "../middlewares/roles_middleware.js";
@@ -167,6 +169,51 @@ router.get(
   userIdParamValidation,
   validate,
   getWorkerDetails
+);
+
+/**
+ * @openapi
+ * /api/admin/point-settings:
+ *   put:
+ *     tags:
+ *       - Admin
+ *     summary: Update point settings
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - points
+ *               - cash_value
+ *             properties:
+ *               points:
+ *                 type: integer
+ *                 example: 10
+ *               cash_value:
+ *                 type: number
+ *                 format: float
+ *                 example: 5.0
+ *     responses:
+ *       200:
+ *         description: Point settings updated successfully.
+ *       400:
+ *         description: Bad request.
+ *       401:
+ *         description: Unauthorized.
+ *       403:
+ *         description: Forbidden.
+ */
+router.put(
+  "/point-settings",
+  authenticate,
+  authorize(ROLES.ADMIN),
+  updatePointSettingsValidation,
+  validate,
+  updatePointSettings
 );
 
 export default router;

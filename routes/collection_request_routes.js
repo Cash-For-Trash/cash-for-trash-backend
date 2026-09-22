@@ -113,7 +113,7 @@ router.post(
 );
 /**
  * @openapi
- * /api/collection-requests/my-collection-requests:
+ * /api/collection-requests/my-collection-requests?status={status}&page={page}&page_size={page_size}:
  *   get:
  *     summary: Get collection requests for customer
  *     tags:

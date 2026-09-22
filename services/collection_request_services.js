@@ -2,7 +2,7 @@ import prisma from "../config/db.js";
 import AppError from "../utils/app_error.js";
 import { calculateWorkerShare } from "../utils/pricing.js";
 import { assignWorkerForAvailability } from "../utils/worker_assignment.js";
-import { formatTime, getNext7DaysRange } from "../utils/time.js";
+import { formatTime, getNext7DaysRange,getNextCollectionDate,formatDate } from "../utils/time.js";
 import { paginate } from "../utils/pagination.js";
 export const createCollectionRequest = async (userId, data) => {
   const {
@@ -114,6 +114,7 @@ if (existingRequest) {
         status: "PENDING",
         payment_method,
         scheduled_day: availability.day_of_week,
+        scheduled_date: getNextCollectionDate(availability.day_of_week),
         scheduled_from_time: availability.from_time,
         scheduled_to_time: availability.to_time,
         service_price: servicePrice,
@@ -154,12 +155,28 @@ if (existingRequest) {
 // get customer collection request
 
 export const getCustomerCollectionRequestService = async (userId,queryParams) => {
+  const requestedStatus = queryParams.status?.toUpperCase();
+  const validStatuses = [
+    "PENDING",
+    "NEEDS_RESCHEDULE",
+    "ACCEPTED",
+    "ON_THE_WAY",
+    "COLLECTED",
+    "CANCELLED",
+  ];
+
+  if (requestedStatus && !validStatuses.includes(requestedStatus)) {
+    throw new AppError("Invalid collection request status.", 400);
+  }
+
   const result = await paginate( prisma.collectionRequest,queryParams,
     {
     
     where: {
       user_id: userId,
-      status: queryParams.status ? queryParams.status : undefined,
+      status: requestedStatus
+        ? requestedStatus
+        : { in: ["PENDING", "COLLECTED"] },
     },
     orderBy: {
         request_date: 'desc'
@@ -169,8 +186,10 @@ export const getCustomerCollectionRequestService = async (userId,queryParams) =>
      
   result.data = result.data.map((request) => ({
     collection_request_id: request.collection_request_id,
-    request_date: request.request_date,
+    request_date: formatDate(request.request_date),
     scheduled_day: request.scheduled_day,
+    scheduled_date:
+      request.scheduled_date || formatDate(getNextCollectionDate(request.scheduled_day)),
     scheduled_from_time: formatTime(request.scheduled_from_time),
     scheduled_to_time: formatTime(request.scheduled_to_time),
     status: request.status,
@@ -180,7 +199,10 @@ export const getCustomerCollectionRequestService = async (userId,queryParams) =>
 };
 
 
-export const getCustomerCollectionRequestDetailsService = async (userId, requestId) => {
+export const getCustomerCollectionRequestDetailsService = async (
+  userId,
+  requestId
+) => {
   const request = await prisma.collectionRequest.findFirst({
     where: {
       collection_request_id: requestId,
@@ -188,6 +210,7 @@ export const getCustomerCollectionRequestDetailsService = async (userId, request
     },
     include: {
       address: true,
+
       requestGarbages: {
         include: {
           garbageType: {
@@ -198,8 +221,55 @@ export const getCustomerCollectionRequestDetailsService = async (userId, request
           },
         },
       },
+
       payments: true,
     },
   });
-  return request;
-}
+
+  if (!request) {
+    throw new AppError("Collection request not found.", 404);
+  }
+
+  return {
+    collection_request_id: request.collection_request_id,
+
+    request_date: formatDate(request.request_date),
+
+    scheduled_day: request.scheduled_day,
+
+    scheduled_date: request.scheduled_date||formatDate(getNextCollectionDate(request.scheduled_day)),
+
+    scheduled_from_time: formatTime(request.scheduled_from_time),
+
+    scheduled_to_time: formatTime(request.scheduled_to_time),
+
+    status: request.status,
+
+    payment_method: request.payment_method,
+
+    service_price: Number(request.service_price),
+
+    worker_share: Number(request.worker_share),
+
+    address: {
+      address_id: request.address.address_id,
+      city: request.address.city,
+    },
+
+    garbages: request.requestGarbages.map((rg) => ({
+      garbage_type_id: rg.garbageType.garbage_type_id,
+      garbage_type_name: rg.garbageType.garbage_type_name,
+      expected_weight: Number(rg.expected_weight),
+    })),
+
+    payment: request.payments
+      ? {
+          payment_id: request.payments.payment_id,
+          payment_method: request.payments.payment_method,
+          payment_status: request.payments.payment_status,
+          payment_amount: Number(request.payments.payment_amount),
+          payment_date: request.payments.payment_date,
+        }
+      : null,
+  };
+};

@@ -303,4 +303,72 @@ export const addActualWeightService = async (
 
 
 
+// get collection request for worker today
+export const getWorkerCollectionRequestForTodayService = async (workerId) => {
+  const worker = await prisma.worker.findUnique({
+    where: {
+      user_id: workerId,
+    },
+  });
+  if (!worker) {
+    throw new AppError("Worker not found.", 404);
+  }
+   const today = new Date();
 
+   const collectionRequests = await prisma.collectionRequest.findMany({
+    where: {
+      scheduled_date: today,
+      availability: {
+        workerAvailabilities: {
+          some: {
+            user_id: workerId,
+          },
+        },
+      },
+    },
+  });
+
+  return collectionRequests;
+}
+
+// today collection request for worker details
+export const getWorkerCollectionRequestForTodayDetailsService = async (workerId, requestId) => {
+  const worker = await prisma.worker.findUnique({
+    where: {
+      user_id: workerId,
+    },
+  });
+  if (!worker) {
+    throw new AppError("Worker not found.", 404);
+  }
+const today = new Date();
+  
+  const collectionRequest = await prisma.collectionRequest.findFirst({
+    where: {
+      scheduled_date: today,
+      collection_request_id: requestId,
+    },
+    include: {
+      user: {
+        select: {
+          first_name: true,
+          last_name: true,
+          mobile: true,
+        },
+      },
+      address: true,
+      requestGarbages: {
+        include: {
+          garbageType: true,
+        },
+      },
+      payments: true,
+    },
+    });
+
+  if (!collectionRequest) {
+    throw new AppError("Collection request not found.", 404);
+  }
+
+  return collectionRequest;
+    }

@@ -20,7 +20,14 @@ const sendPushNotification = async (fcm_token, title, message) => {
         return response;
 
     } catch (error) {
-        console.error("FCM Error:", error);
+        const errorCode = error?.code || error?.errorInfo?.code;
+        const isInvalidToken =
+            errorCode === "messaging/registration-token-not-registered" ||
+            errorCode === "messaging/invalid-registration-token";
+
+        if (!isInvalidToken) {
+            console.error("FCM Error:", error);
+        }
         throw error;
     }
 };

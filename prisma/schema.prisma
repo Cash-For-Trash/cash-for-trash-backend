@@ -88,6 +88,14 @@ enum NotificationType {
 
   SYSTEM
 }
+model PointSetting {
+  id          Int      @id @default(autoincrement())
+  points      Int     
+  cash_value  Decimal  @db.Decimal(10, 2) 
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
 
 model PointsTransaction {
   point_id String @id @default(cuid())
@@ -168,6 +176,7 @@ model CollectionRequest {
   payment_method PaymentMethod
 
   scheduled_day       DayOfWeek
+  scheduled_date DateTime?
   scheduled_from_time DateTime  @db.Time
   scheduled_to_time   DateTime  @db.Time
   service_price       Decimal   @db.Decimal(10, 2)

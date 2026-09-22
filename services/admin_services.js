@@ -94,3 +94,36 @@ export const getWorkerDetails = async (userId) => {
     approved_at: user.worker ? user.worker.approved_at : null,
   };
 };
+
+// update pointSetting for customer cash value
+
+export const updatePointSettings = async ({ points, cash_value }) => {
+  const pointSetting = await prisma.pointSetting.findFirst({
+    where: {
+      is_active: true,
+    },
+  });
+
+  if (!pointSetting) {
+    return await prisma.pointSetting.create({
+      data: {
+        points,
+        cash_value,
+        is_active: true,
+      },
+    });
+  }
+
+  return await prisma.pointSetting.update({
+    where: {
+      id: pointSetting.id,
+    },
+    data: {
+      points,
+      cash_value,
+    },
+  });
+};
+
+
+

@@ -18,3 +18,37 @@ export const getNext7DaysRange = () => {
     endDate,
   };
 };
+
+
+const dayMap = {
+  SUNDAY: 0,
+  MONDAY: 1,
+  TUESDAY: 2,
+  WEDNESDAY: 3,
+  THURSDAY: 4,
+  FRIDAY: 5,
+  SATURDAY: 6,
+};
+
+export const getNextCollectionDate = (scheduledDay) => {
+  const today = new Date();
+
+  const targetDay = dayMap[scheduledDay];
+  const currentDay = today.getDay();
+
+  let diff = targetDay - currentDay;
+  if (diff <= 0) {
+    diff += 7;
+  }
+
+  const collectionDate = new Date(today);
+  collectionDate.setDate(today.getDate() + diff);
+
+  collectionDate.setHours(0, 0, 0, 0);
+
+  return collectionDate;
+};
+
+export const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("en-GB");
+};
