@@ -3,6 +3,7 @@ import { approveWorker, getWorkerCollectionRequest,getWorkerCollectionRequestDet
 import { ROLES } from "../utils/constants.js";
 import { authenticate, validate } from "../middlewares/auth_middleware.js";
 import { authorize } from "../middlewares/roles_middleware.js";
+import { resolveTargetWorker } from "../middlewares/worker_resolution_middleware.js";
 import { addActualWeightValidation , getCollectionRequestByStatusValidation ,approveWorkerValidation,} from "../validations/worker_validation.js";
 const router = Router();
 
@@ -30,7 +31,7 @@ const router = Router();
  *       409:
  *         description: Worker already approved.
  */
-router.patch("/:id/approve", authenticate, authorize(ROLES.ADMIN), approveWorkerValidation, validate, approveWorker);
+router.patch("/:id/approve", authenticate, authorize(ROLES.ADMIN, ROLES.SUPERVISOR), approveWorkerValidation, validate, approveWorker);
 
 /**
  * @openapi
@@ -49,10 +50,11 @@ router.patch("/:id/approve", authenticate, authorize(ROLES.ADMIN), approveWorker
  */
 
 router.get(
-  "/collection-requests",
+  ["/collection-requests", "/:workerId/collection-requests"],
   authenticate,
-  authorize(ROLES.WORKER),
-getWorkerCollectionRequest
+  authorize(ROLES.WORKER, ROLES.SUPERVISOR),
+  resolveTargetWorker,
+  getWorkerCollectionRequest
 );
 
 /**
@@ -79,9 +81,10 @@ getWorkerCollectionRequest
  */
 
 router.get(
-  "/collection-requests/status/:status",
+  ["/collection-requests/status/:status", "/:workerId/collection-requests/status/:status"],
   authenticate,
-  authorize(ROLES.WORKER),
+  authorize(ROLES.WORKER, ROLES.SUPERVISOR),
+  resolveTargetWorker,
   getCollectionRequestByStatusValidation,
   validate,
   getCollectionRequestByStatus
@@ -111,9 +114,10 @@ router.get(
  */
 
 router.get(
-  "/collection-requests/:requestId",
+  ["/collection-requests/:requestId", "/:workerId/collection-requests/:requestId"],
   authenticate,
-  authorize(ROLES.WORKER),
+  authorize(ROLES.WORKER, ROLES.SUPERVISOR),
+  resolveTargetWorker,
   getWorkerCollectionRequestDetails
 );
 
@@ -164,9 +168,10 @@ router.get(
  */
 
 router.patch(
-  "/collection-requests/:requestId",
+  ["/collection-requests/:requestId", "/:workerId/collection-requests/:requestId"],
   authenticate,
-  authorize(ROLES.WORKER),
+  authorize(ROLES.WORKER, ROLES.SUPERVISOR),
+  resolveTargetWorker,
   addActualWeightValidation,
   validate, 
   updateCollectionRequest

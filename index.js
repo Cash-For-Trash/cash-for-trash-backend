@@ -21,6 +21,7 @@ import paymentRoutes from "./routes/payment_routes.js";
 import webhooksRoutes from "./routes/webhook_routes.js";
 import notificationRoutes from "./routes/notification_routes.js";
 import userDeviceRoutes from "./routes/userdevice_routes.js";
+import supervisorRoutes from "./routes/supervisor_routes.js";
 import { errorHandler } from "./middlewares/error_middleware.js";
 import { swaggerUi, swaggerSpec } from "./swagger.js";
 
@@ -46,6 +47,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/garbage-types", garbageTypesRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/supervisor", supervisorRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/areas", areaRoutes);
 app.use("/api/availabilities", availabilityRoutes);

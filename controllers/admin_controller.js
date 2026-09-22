@@ -48,3 +48,59 @@ export const getWorkerDetails = async (req, res, next) => {
     next(error);
   }
 };
+
+export const createSupervisor = async (req, res, next) => {
+  try {
+    const supervisor = await AdminService.createSupervisor(req.body);
+    return successResponse(res, "Supervisor created successfully.", supervisor, 201);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSupervisors = async (req, res, next) => {
+  try {
+    const result = await AdminService.getSupervisors(req.query);
+    return paginationResponse(
+      res,
+      "Supervisors retrieved successfully.",
+      {
+        page: result.page,
+        page_size: result.page_size,
+        total_items: result.total_items,
+        total: result.total_pages,
+      },
+      result.data,
+      200
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSupervisorDetails = async (req, res, next) => {
+  try {
+    const result = await AdminService.getSupervisorDetails(req.params.user_id);
+    return successResponse(res, "Supervisor details retrieved successfully.", result, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateSupervisor = async (req, res, next) => {
+  try {
+    const result = await AdminService.updateSupervisor(req.params.user_id, req.body);
+    return successResponse(res, "Supervisor updated successfully.", result, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteSupervisor = async (req, res, next) => {
+  try {
+    const result = await AdminService.deleteSupervisor(req.params.user_id);
+    return successResponse(res, "Supervisor deactivated successfully.", result, 200);
+  } catch (error) {
+    next(error);
+  }
+};

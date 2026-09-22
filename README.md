@@ -42,12 +42,13 @@ Client Request
 
 ## 👥 User Roles, Titles & Responsibilities
 
-The application defines three distinct primary roles (`customer`, `worker`, `admin`):
+The application defines four primary roles (`customer`, `worker`, `admin`, `supervisor`):
 
 | Role Title | Description | Primary Responsibilities & Capabilities |
 | :--- | :--- | :--- |
 | 👤 **Customer** | Citizen / Recycler / End User | - Register account & verify email via OTP.<br>- Manage personal profile & delivery/pickup addresses with geocoded coordinates.<br>- Create and schedule **Collection Requests** for waste pickup based on area availability.<br>- Specify expected garbage types and weight estimations.<br>- Select payment methods (**CASH** per pickup or **MONTHLY** subscription).<br>- Track collection request lifecycle (`PENDING`, `ACCEPTED`, `ON_THE_WAY`, `COLLECTED`, `NEEDS_RESCHEDULE`, `CANCELLED`).<br>- Earn reward points upon collection based on actual waste weight & garbage type rates.<br>- View points transaction history.<br>- Browse **Rewards Catalog** and submit **Reward Redemption** requests. |
-| 🚚 **Worker** | Collection Field Agent / Trash Collector | - Register with **National ID** (account requires Admin verification & approval before receiving tasks).<br>- Set working availability slots within assigned geographic service **Areas**.<br>- View current and historical assigned **Collection Requests**.<br>- Perform physical pickups, update request status (`ACCEPTED`, `ON_THE_WAY`, `COLLECTED`).<br>- Record actual garbage weights collected on site.<br>- Earn calculated worker percentage share income per fulfilled collection. |
+| 🚚 **Worker** | Collection Field Agent / Trash Collector | - Register with **National ID** (account requires Admin/Supervisor verification & approval before receiving tasks).<br>- Set working availability slots within assigned geographic service **Areas**.<br>- View current and historical assigned **Collection Requests**.<br>- Perform physical pickups, update request status (`ACCEPTED`, `ON_THE_WAY`, `COLLECTED`).<br>- Record actual garbage weights collected on site.<br>- Earn calculated worker percentage share income per fulfilled collection. |
+| 👮 **Supervisor** | Field Operations Supervisor | - Create, view, update, and deactivate **Worker** accounts.<br>- Full access to execute Worker collection and availability endpoints on behalf of workers by passing `:workerId` path parameters.<br>- Approve worker registrations. |
 | 👑 **Admin** | Operations Manager / System Administrator | - Review & approve pending **Worker** applications.<br>- Create and manage **Areas** (geographic bounding coordinates & base service prices).<br>- Define area-based **Availability** time slots for days of the week.<br>- Manage **Garbage Types** catalog (name, image, price per kg).<br>- Manage **Rewards Catalog** (reward title, required points, image).<br>- Review and approve or reject customer **Reward Redemption** requests.<br>- Configure global **Pricing Settings** (worker percentage share, monthly subscription price, min/max collection weight limits).<br>- Monitor customer and worker accounts and system notifications. |
 
 ---
@@ -130,12 +131,17 @@ The application defines three distinct primary roles (`customer`, `worker`, `adm
 - `POST /api/collection-requests`: Create waste collection request with address, schedule, payment method & expected garbage breakdown (`Customer`).
 - `GET /api/collection-requests/addresses/:address_id/availabilities`: Get available collection time slots for a specific customer address (`Customer`).
 
-### 8. Worker Approval & Management (`/api/workers` & `/api/admin/workers`)
+### 8. Worker & Supervisor Management (`/api/admin`)
 - `PATCH /api/workers/:id/approve`: Approve worker account using National ID (`Admin`).
 - `GET /api/admin/workers`: List workers with pagination (`Admin`).
 - `GET /api/admin/workers/:user_id`: Get worker details (`Admin`).
 - `GET /api/admin/customers`: List customers with pagination (`Admin`).
 - `GET /api/admin/customers/:user_id`: Get customer details (`Admin`).
+- `POST /api/admin/supervisors`: Create a new supervisor account (`Admin`).
+- `GET /api/admin/supervisors`: List supervisors with pagination (`Admin`).
+- `GET /api/admin/supervisors/:user_id`: Get supervisor details (`Admin`).
+- `PATCH /api/admin/supervisors/:user_id`: Update supervisor account (`Admin`).
+- `DELETE /api/admin/supervisors/:user_id`: Deactivate supervisor account (`Admin`).
 
 ### 9. Rewards Catalog (`/api/rewards`)
 - `POST /api/rewards`: Add new reward item to catalog (`Admin`).
@@ -154,6 +160,13 @@ The application defines three distinct primary roles (`customer`, `worker`, `adm
 ### 11. Pricing Settings (`/api/pricing`)
 - `GET /api/pricing`: Get global pricing configuration (`Admin`).
 - `PATCH /api/pricing`: Update worker percentage share & subscription prices (`Admin`).
+
+### 12. Supervisor Worker Operations (`/api/supervisor`)
+- `POST /api/supervisor/workers`: Register & create a new worker account (`Supervisor` & `Admin`).
+- `GET /api/supervisor/workers`: List all registered workers paginated (`Supervisor` & `Admin`).
+- `GET /api/supervisor/workers/:id`: Get worker profile details (`Supervisor` & `Admin`).
+- `PATCH /api/supervisor/workers/:id`: Update worker profile, national ID, or active status (`Supervisor` & `Admin`).
+- `DELETE /api/supervisor/workers/:id`: Deactivate worker account (`Supervisor` & `Admin`).
 
 ---
 
