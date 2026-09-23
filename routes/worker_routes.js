@@ -177,4 +177,4 @@ router.patch(
   updateCollectionRequest
 );
 
-export default router;
+export default router; 
