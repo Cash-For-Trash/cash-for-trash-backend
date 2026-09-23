@@ -42,6 +42,10 @@ enum CollectionStatus {
   COLLECTED
   CANCELLED
 }
+enum RequestType {
+  MIXED
+  RECYCLABLE
+}
 
 enum OrderStatus {
   PENDING
@@ -170,11 +174,12 @@ model CollectionRequest {
   quantity       Decimal          @db.Decimal(10, 2)
   collection_img String?          @db.VarChar(512)
   status         CollectionStatus
+  request_type    RequestType
 
   requestGarbages RequestGarbage[]
   payments        Payment?
 
-  payment_method PaymentMethod
+  payment_method PaymentMethod?
 
   scheduled_day       DayOfWeek
   scheduled_date DateTime?

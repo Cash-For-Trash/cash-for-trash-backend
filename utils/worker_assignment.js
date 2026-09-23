@@ -8,8 +8,8 @@ const ACTIVE_STATUSES = [
   "ON_THE_WAY",
 ];
 
-const getAvailableWorkers = async (availabilityId) => {
-  return await prisma.workerAvailability.findMany({
+const getAvailableWorkers = async (availabilityId, db = prisma) => {
+  return await db.workerAvailability.findMany({
     where: {
       availability_id: availabilityId,
       worker: {
@@ -66,11 +66,12 @@ const chooseWorker = (workers) => {
 
 export const assignWorkerForAvailability = async (
   availabilityId,
-  collectionRequestId
+  collectionRequestId,
+  db = prisma
 ) => {
-  const workers = await getAvailableWorkers(availabilityId);
+  const workers = await getAvailableWorkers(availabilityId, db);
   const selected = chooseWorker(workers);
-  await prisma.workerCollectionRequest.create({
+  await db.workerCollectionRequest.create({
     data: {
       user_id: selected.user_id,
       collection_request_id: collectionRequestId,

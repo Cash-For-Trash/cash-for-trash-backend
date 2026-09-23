@@ -52,47 +52,27 @@ router.get(
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - address_id
- *               - availability_id
- *               - payment_method
- *               - quantity
- *               - garbage_types
- *             properties:
- *               address_id:
- *                 type: string
- *                 example: cmrkvmwr20000utr4aoa4fjeh
- *               availability_id:
- *                 type: string
- *                 example: cms0x7nz90001v1y85ddoefwp
- *               payment_method:
- *                 type: string
- *                 enum:
- *                   - CASH
- *                   - MONTHLY
- *                 example: CASH
- *               quantity:
- *                 type: number
- *                 example: 5.5
- *               collection_img:
- *                 type: string
- *                 example: https://example.com/trash.jpg
- *               garbage_types:
- *                 type: array
- *                 items:
- *                   type: object
- *                   required:
- *                     - garbage_type_id
- *                     - estimated_weight
- *                   properties:
- *                     garbage_type_id:
- *                       type: string
- *                       example: cmrkvmwr20000utr4aoa4f999
- *                     estimated_weight:
- *                       type: number
- *                       example: 2.5
+ *           examples:
+ *             mixed:
+ *               summary: Mixed Waste Collection
+ *               value:
+ *                 request_type: MIXED
+ *                 address_id: "cm123address"
+ *                 availability_id: "cm123availability"
+ *                 payment_method: CASH
+ *                 quantity: 1
+ *
+ *             recyclable:
+ *               summary: Recyclable Materials Collection
+ *               value:
+ *                 request_type: RECYCLABLE
+ *                 address_id: "cm123address"
+ *                 availability_id: "cm123availability"
+ *                 garbage_types:
+ *                   - garbage_type_id: "cm123plastic"
+ *                     estimated_weight: 5
+ *                   - garbage_type_id: "cm123paper"
+ *                     estimated_weight: 3
  *     responses:
  *       201:
  *         description: Collection Request created successfully.

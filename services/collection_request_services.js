@@ -6,36 +6,84 @@ import { formatTime, getNext7DaysRange,getNextCollectionDate,formatDate } from "
 import { paginate } from "../utils/pagination.js";
 export const createCollectionRequest = async (userId, data) => {
   const {
+    request_type,
     address_id,
     availability_id,
     payment_method,
     quantity,
     collection_img,
-    garbage_types,
+    garbage_types = [],
   } = data;
 
+  const isMixed = request_type === "MIXED";
+  const isRecyclable = request_type === "RECYCLABLE";
+
+  // Validate request type
+
+  if (!isMixed && !isRecyclable) {
+    throw new AppError("Invalid request type.", 400);
+  }
+
+  // Mixed = payment required
+  if (isMixed && !payment_method) {
+    throw new AppError("Payment method is required.", 400);
+  }
+
+  // Recyclable = no payment
+  if (isRecyclable && payment_method) {
+    throw new AppError("Payment is not required.", 400);
+  }
+
+  // Recyclable = garbage types required
+  if (isRecyclable && !garbage_types.length) {
+    throw new AppError(
+      "Garbage types are required.",
+      400
+    );
+  }
+  if(isMixed && garbage_types.length){
+    throw new AppError(
+      "Garbage types are not required.",
+      400
+    );
+  }
+
+  // Mixed =no garbage types
+  if (isMixed && garbage_types.length) {
+    throw new AppError(
+      "Garbage types are not required for mixed waste.",
+      400
+    );
+  }
+
+  // =========================
+  // Check weekly request
+  // =========================
 
   const { startDate, endDate } = getNext7DaysRange();
 
-const existingRequest = await prisma.collectionRequest.findFirst({
-  where: {
-    user_id: userId,
-    request_date: {
-      gte: startDate,
-      lte: endDate
-    },
-    status: {
-      not: "CANCELLED",
-    },
-  },
-});
+  const existingRequest =
+    await prisma.collectionRequest.findFirst({
+      where: {
+        user_id: userId,
+        request_date: {
+          gte: startDate,
+          lte: endDate,
+        },
+        status: {
+          not: "CANCELLED",
+        },
+      },
+    });
 
-if (existingRequest) {
-  throw new AppError(
-    "You have already booked this collection time this week.",
-    400
-  );
-}
+  if (existingRequest) {
+    throw new AppError(
+      "You have already booked a collection this week.",
+      400
+    );
+  }
+
+  // Check address
 
   const address = await prisma.address.findFirst({
     where: {
@@ -48,6 +96,10 @@ if (existingRequest) {
     throw new AppError("Address not found.", 404);
   }
 
+ 
+  // Check availability
+
+
   const availability = await prisma.availability.findFirst({
     where: {
       availability_id,
@@ -57,14 +109,20 @@ if (existingRequest) {
     },
   });
 
-  if (!availability || !availability.area || !availability.area.is_active) {
-    throw new AppError("Availability slot not found.", 404);
+  if (!availability?.area?.is_active) {
+    throw new AppError(
+      "Availability slot not found.",
+      404
+    );
   }
 
   const area = availability.area;
 
+// check Area
+
   const addressLat = Number(address.latitude);
   const addressLng = Number(address.longitude);
+
   const isCovered =
     addressLat <= Number(area.north_lat) &&
     addressLat >= Number(area.south_lat) &&
@@ -72,86 +130,166 @@ if (existingRequest) {
     addressLng >= Number(area.west_lng);
 
   if (!isCovered) {
-    throw new AppError("Service is unavailable in your area.", 400);
+    throw new AppError(
+      "Service is unavailable in your area.",
+      400
+    );
   }
 
-  if (payment_method === "MONTHLY") {
-    const subscription = await prisma.subscription.findFirst({
+
+// Check Garbage in recycling only
+  if (isRecyclable) {
+    const garbageTypeIds = garbage_types.map(
+      (item) => item.garbage_type_id
+    );
+
+    const types = await prisma.garbageType.findMany({
       where: {
-        user_id: userId,
-        is_active: true,
-        end_date: { gte: new Date() },
+        garbage_type_id: {
+          in: garbageTypeIds,
+        },
       },
     });
 
-    if (!subscription) {
-      throw new AppError("Monthly subscription is inactive.", 400);
+    if (types.length !== garbageTypeIds.length) {
+      throw new AppError(
+        "One or more garbage types are invalid.",
+        404
+      );
     }
   }
 
-  const garbageTypeIds = garbage_types.map((g) => g.garbage_type_id);
-  const types = await prisma.garbageType.findMany({
-    where: {
-      garbage_type_id: { in: garbageTypeIds },
-    },
-  });
 
-  if (types.length !== garbageTypeIds.length) {
-    throw new AppError("One or more garbage types are invalid.", 404);
+  // Check subscription
+
+  if (payment_method === "MONTHLY") {
+    const subscription =
+      await prisma.subscription.findFirst({
+        where: {
+          user_id: userId,
+          is_active: true,
+          end_date: {
+            gte: new Date(),
+          },
+        },
+      });
+
+    if (!subscription) {
+      throw new AppError(
+        "Monthly subscription is inactive.",
+        400
+      );
+    }
   }
 
-  const servicePrice = Number(area.service_price || 0);
-  const workerShare = await calculateWorkerShare(servicePrice);
+  const servicePrice = isMixed
+    ? Number(area.service_price || 0)
+    : 0;
+
+  const workerShare = isMixed
+    ? await calculateWorkerShare(servicePrice)
+    : 0;
 
   const result = await prisma.$transaction(async (tx) => {
-    const request = await tx.collectionRequest.create({
-      data: {
-        user_id: userId,
-        address_id,
-        availability_id,
-        quantity,
-        collection_img,
-        status: "PENDING",
-        payment_method,
-        scheduled_day: availability.day_of_week,
-        scheduled_date: getNextCollectionDate(availability.day_of_week),
-        scheduled_from_time: availability.from_time,
-        scheduled_to_time: availability.to_time,
-        service_price: servicePrice,
-        worker_share: workerShare,
+    const request =
+      await tx.collectionRequest.create({
+        data: {
+          user: {
+            connect: {
+              user_id: userId,
+            },
+          },
+          address: {
+            connect: {
+              address_id,
+            },
+          },
+          availability: {
+            connect: {
+              availability_id,
+            },
+          },
 
-      },
-    });
+          request_type,
 
-    await tx.requestGarbage.createMany({
-      data: garbage_types.map((item) => ({
-        collection_request_id: request.collection_request_id,
-        garbage_type_id: item.garbage_type_id,
-        expected_weight: item.estimated_weight || item.expected_weight || 0,
-      })),
-    });
+          quantity: quantity || 0,
+          collection_img,
 
-    await tx.payment.create({
-      data: {
-        collection_request_id: request.collection_request_id,
-        payment_method: payment_method,
-        payment_status: payment_method === "MONTHLY" ? "PAID" : "PENDING",
-        payment_amount: servicePrice,
-      },
-    });
+          status: "PENDING",
 
+          payment_method: isMixed
+            ? payment_method
+            : null,
+
+          scheduled_day:
+            availability.day_of_week,
+
+          scheduled_date:
+            getNextCollectionDate(
+              availability.day_of_week
+            ),
+
+          scheduled_from_time:
+            availability.from_time,
+
+          scheduled_to_time:
+            availability.to_time,
+
+          service_price: servicePrice,
+          worker_share: workerShare,
+        },
+      });
+
+    await assignWorkerForAvailability(
+      availability_id,
+      request.collection_request_id,
+      tx
+    );
+
+    if (isRecyclable) {
+      await tx.requestGarbage.createMany({
+        data: garbage_types.map((item) => ({
+          collection_request_id:
+            request.collection_request_id,
+
+          garbage_type_id:
+            item.garbage_type_id,
+
+          expected_weight:
+            item.estimated_weight ||
+            item.expected_weight ||
+            0,
+        })),
+      });
+    }
+
+
+    if (isMixed) {
+      await tx.payment.create({
+        data: {
+          collection_request_id:
+            request.collection_request_id,
+
+          payment_method,
+
+          payment_status:
+            payment_method === "MONTHLY"
+              ? "PAID"
+              : "PENDING",
+
+          payment_amount: servicePrice,
+        },
+      });
+    }
 
     return request;
+  }, {
+    maxWait: 10000,
+    timeout: 15000,
   });
-
-  await assignWorkerForAvailability(
-    availability.availability_id,
-    result.collection_request_id
-  );
 
   return result;
 };
-
 
 // get customer collection request
 

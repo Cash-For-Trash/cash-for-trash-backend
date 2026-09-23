@@ -54,6 +54,7 @@ router.get(
 router.get(
   "/leaderboard",
   authenticate,
+  authorize(ROLES.CUSTOMER),
   getCustomerLeaderBoard
 );
 
