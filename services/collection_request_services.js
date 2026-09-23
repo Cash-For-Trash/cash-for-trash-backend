@@ -29,11 +29,6 @@ export const createCollectionRequest = async (userId, data) => {
     throw new AppError("Payment method is required.", 400);
   }
 
-  // Recyclable = no payment
-  // if (isRecyclable && payment_method) {
-  //   throw new AppError("Payment is not required.", 400);
-  // }
-
   // Recyclable = garbage types required
   if (isRecyclable && !garbage_types.length) {
     throw new AppError(
