@@ -28,10 +28,6 @@ export const createCollectionRequestValidation = [
         .isIn(["MONTHLY", "CASH", "CARD", "WALLET"])
         .withMessage("Invalid payment method."),
 
-    body("payment_method")
-        .if(body("request_type").equals("RECYCLABLE"))
-        .custom((value) => !value)
-        .withMessage("Payment is not required."),
 
     body("collection_img")
         .optional()

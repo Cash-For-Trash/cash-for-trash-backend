@@ -162,7 +162,7 @@ export const createCollectionRequest = async (userId, data) => {
 
   // Check subscription
 
-  if (payment_method === "MONTHLY") {
+  if (isMixed && payment_method === "MONTHLY") {
     const subscription =
       await prisma.subscription.findFirst({
         where: {
