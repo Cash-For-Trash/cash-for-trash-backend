@@ -322,6 +322,7 @@ export const getCustomerCollectionRequestService = async (userId, queryParams) =
   });
 
   result.data = result.data.map((request) => ({
+    request_type:request.request_type,
     collection_request_id: request.collection_request_id,
     request_date: formatDate(request.request_date),
     scheduled_day: request.scheduled_day,
@@ -368,6 +369,7 @@ export const getCustomerCollectionRequestDetailsService = async (
   }
 
   return {
+    request_type:request.request_type,
     collection_request_id: request.collection_request_id,
 
     request_date: formatDate(request.request_date),
@@ -382,9 +384,9 @@ export const getCustomerCollectionRequestDetailsService = async (
 
     status: request.status,
 
-    payment_method: request.payment_method,
+    payment_method: request.payment_method||null,
 
-    service_price: Number(request.service_price),
+    service_price: Number(request.service_price)||0,
 
     worker_share: Number(request.worker_share),
 
